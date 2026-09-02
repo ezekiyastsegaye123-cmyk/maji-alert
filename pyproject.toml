@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "treering"
+version = "0.1.0"
+description = "Tree-ring width detrending pipeline using negative exponential growth models"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "xarray>=2024.1",
+    "netCDF4>=1.6",
+    "scikit-learn>=1.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+treering = "treering.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

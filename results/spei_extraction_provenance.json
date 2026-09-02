@@ -1,0 +1,77 @@
+{
+  "pipeline": "SPEIbase NetCDF -> Annual Ground-Truth Extractor",
+  "timestamp_utc": "2026-09-01T20:47:57.601035+00:00",
+  "environment": {
+    "python_version": "3.13.15 (main, Nov 10 2011, 15:00:00) [GCC 15.2.0]",
+    "platform": "Linux-7.1.12-200.fc44.x86_64-x86_64-with-glibc2.42",
+    "xarray_version": "2026.7.0",
+    "pandas_version": "3.0.5",
+    "numpy_version": "2.5.2"
+  },
+  "input_dataset": {
+    "path": "/home/hezekiah/Documents/Egate_AIML/Fradscr/data/spei01.nc",
+    "filename": "spei01.nc",
+    "sha256": "960ac5e8eef68c37a5db91cbe987aa2d49d98e4b711afc0bbce81c19d0392014",
+    "global_attributes": {
+      "conventions": "CF-1.11",
+      "title": "Global 1-month SPEI, z-values, 0.5 degree",
+      "version": "2.11.0",
+      "id": "./outputNcdf/spei01.nc",
+      "summary": "Global dataset of the Standardized Precipitation-Evapotranspiration Index (SPEI) at the 1-month time scale. Using CRU TS 4.09 precipitation and potential evapotranspiration data",
+      "keywords": "drought, climatology, SPEI, Standardized Precipitation-Evapotranspiration Index",
+      "institution": "Consejo Superior de Investigaciones Cient\u00edficas, CSIC",
+      "source": "http://sac.csic.es/spei",
+      "creators": "Santiago Beguer\u00eda <santiago.begueria@csic.es> and Sergio Vicente-Serrano <svicen@ipe.csic.es>",
+      "software": "Created in R using the SPEI package (https://cran.r-project.org/web/packages/SPEI/;https://github.com/sbegueria/SPEI)",
+      "call": "spei.nc(sca=i, inPre=./inputData/cru_ts4.09.1901.2024.pre.dat.nc, outFile=paste)",
+      "date": "Tue May 27 07:20:04 2025",
+      "reference": "Beguer\u00eda S., Vicente-Serrano S., Reig F., Latorre B. (2014) Standardized precipitation evapotranspiration index (SPEI) revisited: Parameter fitting, evapotranspiration models, tools, datasets and drought monitoring. International Journal of Climatology 34, 3001-3023.",
+      "reference2": "Vicente-Serrano S.M., Beguer\u00eda S., L\u00f3pez-Moreno J.I. (2010) A Multiscalar Drought Index Sensitive to Global Warming: The Standardized Precipitation Evapotranspiration Index. Journal of Climate 23, 1696\u20131718.",
+      "reference3": "Beguer\u00eda S., Vicente-Serrano S., Angulo-Mart\u00ednez M. (2010) A multi-scalar global drought data set: the SPEIbase. Bulletin of the American Meteorological Society 91(10), 1351\u20131356."
+    },
+    "variable_name": "spei",
+    "variable_attributes": {
+      "units": "1",
+      "long_name": "Standardized Precipitation-Evapotranspiration Index",
+      "grid_mapping": "crs"
+    }
+  },
+  "spatial_extraction": {
+    "requested_lat": 9.63,
+    "requested_lon": 39.53,
+    "selected_lat": 9.75,
+    "selected_lon": 39.75,
+    "lat_offset": 0.11999999999999922,
+    "lon_offset": 0.21999999999999886,
+    "spatial_distance_km": 27.559509962874696,
+    "selection_method": "nearest"
+  },
+  "temporal_validation": {
+    "start_date": "1901-01-16 00:00:00",
+    "end_date": "2024-12-16 00:00:00",
+    "total_months": 1488,
+    "total_years": 124,
+    "complete_years": 124,
+    "incomplete_years": [],
+    "calendar": "standard",
+    "time_frequency": "monthly"
+  },
+  "annual_aggregation": {
+    "rule": "calendar-year arithmetic mean of monthly values",
+    "require_full_year": true,
+    "min_months_per_year": 12,
+    "total_complete_years": 124,
+    "dropped_years": [],
+    "annual_year_range": [
+      1901,
+      2024
+    ],
+    "statistics": {
+      "mean": 0.006013926126122955,
+      "std": 0.30091588689524906,
+      "min": -0.8384860157966614,
+      "max": 0.7037203311920166
+    }
+  },
+  "output_csv": "/home/hezekiah/Documents/Egate_AIML/Fradscr/results/spei_debrebirkan.csv"
+}

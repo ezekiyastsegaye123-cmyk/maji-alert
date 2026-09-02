@@ -1,0 +1,30 @@
+{
+  "name": "fradscr",
+  "version": "1.0.0",
+  "description": "A production-ready Python pipeline for reading raw tree-ring width measurements from standard Tucson-format `.rwl` files, performing biological detrending using a negative exponential growth model, and calculating standardized Ring Width Index (RWI).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest --runInBand --detectOpenHandles --testTimeout=30000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "mongoose": "^9.9.4",
+    "socket.io": "^4.8.3",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "jest": "^30.5.1",
+    "socket.io-client": "^4.8.3",
+    "supertest": "^7.2.2"
+  }
+}

@@ -1,0 +1,29 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python virtual environments & bytecode
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Large binary datasets (GitHub enforces strict 100 MB file size limit)
+data/*.nc
+copy_of_fradscr.csv
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

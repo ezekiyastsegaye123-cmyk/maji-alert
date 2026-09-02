@@ -1,0 +1,59 @@
+{
+  "model_name": "Random Forest Solar-Tree Drought Forecaster",
+  "drought_threshold_spei": -0.25,
+  "n_training_samples": 114,
+  "training_year_range": [
+    1901,
+    2014
+  ],
+  "kfold_cv_metrics": {
+    "cv_method": "kfold",
+    "n_splits": 5,
+    "classification_accuracy": 0.6656126482213438,
+    "balanced_accuracy": 0.4620760233918129,
+    "precision": 0.16666666666666666,
+    "recall": 0.13,
+    "f1": 0.146031746031746,
+    "roc_auc": 0.3658479532163743,
+    "brier_score": 0.23306286556534758,
+    "regression_r2": 0.0028501729941077915,
+    "regression_mae": 0.23070838976968627,
+    "regression_rmse": 0.2915601670864566
+  },
+  "timeseries_cv_metrics": {
+    "cv_method": "timeseries",
+    "n_splits": 5,
+    "classification_accuracy": 0.6,
+    "balanced_accuracy": 0.5939240824534943,
+    "precision": 0.175,
+    "recall": 0.55,
+    "f1": 0.24761904761904757,
+    "roc_auc": 0.5961287078934138,
+    "brier_score": 0.23670161978604068,
+    "regression_r2": -0.5067699143919115,
+    "regression_mae": 0.23718772091045767,
+    "regression_rmse": 0.29297014940611776
+  },
+  "feature_importances": {
+    "sunspot": 0.04830503920459973,
+    "sunspot_lag1": 0.05138768634683241,
+    "sunspot_lag2": 0.07808127378011748,
+    "sunspot_lag3": 0.06276695646015401,
+    "sunspot_lag4": 0.05269297568006861,
+    "sunspot_lag5": 0.04552265861076292,
+    "sunspot_smooth11": 0.09057421850460093,
+    "sunspot_diff1": 0.08689431942562253,
+    "sunspot_diff3": 0.04644594018764829,
+    "solar_phase": 0.03394271256490408,
+    "solar_phase_sin": 0.026155942874665616,
+    "solar_phase_cos": 0.04795813645132339,
+    "rwi": 0.09565432296663304,
+    "rwi_lag1": 0.046621739395555924,
+    "rwi_diff1": 0.08868205016158663,
+    "rwi_smooth5": 0.09831402738492433
+  },
+  "forecast_period": [
+    2025,
+    2035
+  ]
+}

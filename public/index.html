@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maji Alert: Solar Groundwater Pump Drought Early Warning System for Borana Zone, Ethiopia.">
+  <title>Maji Alert — Drought Early Warning</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header with Language Selector -->
+    <header class="app-header" role="banner">
+      <div class="header-content">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">💧☀️</span>
+          <div>
+            <h1 class="brand-title" data-i18n="app_title">Maji Alert</h1>
+            <p class="brand-subtitle" data-i18n="app_subtitle">Borana Zone Solar Pump Drought Warning</p>
+          </div>
+        </div>
+
+        <div class="lang-selector" role="group" aria-label="Language selection">
+          <button type="button" class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-btn" data-lang="om" aria-pressed="false">Oromoo</button>
+          <button type="button" class="lang-btn" data-lang="am" aria-pressed="false">አማርኛ</button>
+        </div>
+      </div>
+
+      <!-- Live Connection Indicator -->
+      <div class="connection-status" id="connectionStatus" role="status" aria-live="polite">
+        <span class="status-dot online" id="statusDot" aria-hidden="true"></span>
+        <span id="statusText" data-i18n="status_connected">Connected to network</span>
+      </div>
+    </header>
+
+    <main id="mainContent" role="main">
+      <!-- Input Section -->
+      <section class="card input-section" aria-labelledby="inputSectionTitle">
+        <h2 id="inputSectionTitle" class="section-title" data-i18n="section_location">Target Location & Coordinates</h2>
+        <p class="section-desc" data-i18n="location_desc">
+          Detect your GPS location, select a Borana well cluster, or enter coordinates manually.
+        </p>
+
+        <!-- Location Actions -->
+        <div class="location-actions">
+          <button type="button" id="btnGeolocation" class="btn btn-secondary">
+            <span aria-hidden="true">📍</span>
+            <span data-i18n="btn_use_location">Use My Location</span>
+          </button>
+        </div>
+
+        <!-- Borana Quick Presets -->
+        <div class="preset-group">
+          <span class="preset-label" data-i18n="quick_select">Borana Well Clusters:</span>
+          <div class="preset-buttons" role="group" aria-label="Preset locations">
+            <button type="button" class="btn-preset" data-lat="4.88" data-lon="38.08" data-name="Yabelo">Yabelo</button>
+            <button type="button" class="btn-preset" data-lat="4.45" data-lon="38.28" data-name="Dubuluk">Dubuluk</button>
+            <button type="button" class="btn-preset" data-lat="4.05" data-lon="38.32" data-name="Mega">Mega</button>
+            <button type="button" class="btn-preset" data-lat="3.53" data-lon="39.05" data-name="Moyale">Moyale</button>
+          </div>
+        </div>
+
+        <!-- Coordinates Form -->
+        <form id="predictionForm" novalidate>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="inputLatitude" data-i18n="label_latitude">Latitude (°N/S)</label>
+              <input
+                type="number"
+                id="inputLatitude"
+                name="latitude"
+                step="any"
+                min="-90"
+                max="90"
+                placeholder="e.g. 4.88"
+                required
+                aria-describedby="latError"
+              />
+              <span class="input-hint" data-i18n="hint_lat">Range: -90.0 to 90.0</span>
+              <span id="latError" class="field-error" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="inputLongitude" data-i18n="label_longitude">Longitude (°E/W)</label>
+              <input
+                type="number"
+                id="inputLongitude"
+                name="longitude"
+                step="any"
+                min="-180"
+                max="180"
+                placeholder="e.g. 38.08"
+                required
+                aria-describedby="lonError"
+              />
+              <span class="input-hint" data-i18n="hint_lon">Range: -180.0 to 180.0</span>
+              <span id="lonError" class="field-error" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="inputYear" data-i18n="label_year">Forecast Year</label>
+              <input
+                type="number"
+                id="inputYear"
+                name="year"
+                step="1"
+                min="1700"
+                max="2100"
+                value="2026"
+                required
+                aria-describedby="yearError"
+              />
+              <span class="input-hint" data-i18n="hint_year">Solar projection cycle: 2025–2035</span>
+              <span id="yearError" class="field-error" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="submit-container">
+            <button type="submit" id="btnSubmit" class="btn btn-primary">
+              <span id="btnSubmitText" data-i18n="btn_check_drought">Check Drought Forecast</span>
+              <span id="btnSubmitSpinner" class="spinner hidden" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+
+        <div id="generalError" class="alert-banner error-banner hidden" role="alert" aria-live="assertive"></div>
+      </section>
+
+      <!-- Status / Processing Banner -->
+      <div id="processingCard" class="card processing-card hidden" role="status" aria-live="polite">
+        <div class="spinner-large" aria-hidden="true"></div>
+        <p id="processingMessage" data-i18n="loading_text">Analyzing Schwabe solar cycles & tree-ring memory...</p>
+      </div>
+
+      <!-- Results Section -->
+      <section id="resultSection" class="card result-card hidden" aria-labelledby="resultSectionTitle" aria-live="polite">
+        <h2 id="resultSectionTitle" class="section-title" data-i18n="section_result">Drought Risk Assessment</h2>
+
+        <!-- Alert Gauge / Severity Card -->
+        <div id="gaugeContainer" class="gauge-container gauge-normal">
+          <div class="gauge-badge">
+            <span id="gaugeIcon" class="gauge-icon" aria-hidden="true">🟢</span>
+            <div>
+              <div class="gauge-subtitle" data-i18n="risk_level">Risk Level</div>
+              <div id="severityLabel" class="gauge-title">NORMAL / WET</div>
+            </div>
+          </div>
+          <div id="pumpAdvisory" class="pump-advisory" data-i18n="advisory_normal">
+            Normal groundwater recharge expected. Solar water pumping operational at standard quota.
+          </div>
+        </div>
+
+        <!-- Confidence Probability Bars -->
+        <div class="probability-block">
+          <h3 class="block-title" data-i18n="confidence_breakdown">Model Confidence Probabilities</h3>
+
+          <div class="prob-row">
+            <div class="prob-header">
+              <span data-i18n="class_normal">Normal / Wet</span>
+              <strong id="probNormalText">0%</strong>
+            </div>
+            <div class="bar-track" role="progressbar" id="progNormal" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="bar-fill fill-normal" id="barNormal" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="prob-row">
+            <div class="prob-header">
+              <span data-i18n="class_moderate">Moderate Drought</span>
+              <strong id="probModerateText">0%</strong>
+            </div>
+            <div class="bar-track" role="progressbar" id="progModerate" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="bar-fill fill-moderate" id="barModerate" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="prob-row">
+            <div class="prob-header">
+              <span data-i18n="class_severe">Severe Drought</span>
+              <strong id="probSevereText">0%</strong>
+            </div>
+            <div class="bar-track" role="progressbar" id="progSevere" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="bar-fill fill-severe" id="barSevere" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scientific Metadata Grid -->
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label" data-i18n="meta_grid_cell">SPEI Grid Cell:</span>
+            <span class="meta-val" id="metaGridCell">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label" data-i18n="meta_distance">Grid Distance:</span>
+            <span class="meta-val" id="metaDistance">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label" data-i18n="meta_year">Evaluation Year:</span>
+            <span class="meta-val" id="metaYear">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label" data-i18n="meta_latency">Engine Latency:</span>
+            <span class="meta-val" id="metaLatency">—</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer" role="contentinfo">
+      <p data-i18n="footer_text">
+        Maji Alert · Humanitarian Teleconnection Forecasting for Borana Zone, Oromia, Ethiopia · Low-Bandwidth Mode
+      </p>
+    </footer>
+  </div>
+
+  <!-- Zero external CDN dependency: Socket.io served from local backend -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

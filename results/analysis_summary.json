@@ -1,0 +1,23 @@
+{
+  "analysis": "RWI / Sunspot Solar-Cycle Lag Analysis",
+  "smoothing_window_years": 11,
+  "smoothing_type": "11-year centered moving average",
+  "standardization": "z-score with sample standard deviation (ddof=1)",
+  "lag_formula": "R(tau) = corr(RWI(t), SN(t - tau))",
+  "evaluated_lags": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "optimal_lag_years": 0,
+  "optimal_pearson_r": 0.1970080118382849,
+  "optimal_direction": "positive",
+  "optimal_p_value": 0.021512903069369115,
+  "optimal_n_observations": 136,
+  "n_total_merged_rows": 1451,
+  "year_min": 1869,
+  "year_max": 2014
+}
