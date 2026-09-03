@@ -50,6 +50,7 @@
       meta_distance: 'Grid Distance:',
       meta_year: 'Evaluation Year:',
       meta_latency: 'Engine Latency:',
+      loading_analyzing: 'Analyzing Regional Climate Data...',
       loading_text: 'Analyzing Schwabe solar cycles & tree-ring memory...',
       footer_text: 'Maji Alert · Humanitarian Teleconnection Forecasting for Borana Zone, Oromia, Ethiopia · Low-Bandwidth Mode',
       err_geo_denied: 'Location permission was denied. Please enter coordinates manually.',
@@ -96,6 +97,7 @@
       meta_distance: 'Fageenya Qubsumaa:',
       meta_year: 'Waggaa Qoratame:',
       meta_latency: 'Yeroo Qorannoo:',
+      loading_analyzing: 'Oodeeffannoo Qilleensa Naannoo Xiinxalaa Jira...',
       loading_text: 'Marsaa aduu fi mallattoo mukkeeniin ragaa qindeessaa jira...',
       footer_text: 'Maji Alert · Tajaajila Raaga Hongee Godina Booranaatiif Hojjetame · Haafeeraa Xiqqaa',
       err_geo_denied: 'Eeyyamni bakkaa hin kennamne. Koordineetii harkaan galchaa.',
@@ -142,6 +144,7 @@
       meta_distance: 'የሴል ርቀት:',
       meta_year: 'የተገመገመበት ዓመት:',
       meta_latency: 'የሞዴሉ የፍጥነት ጊዜ:',
+      loading_analyzing: 'የአካባቢ የአየር ንብረት መረጃን በመተንተን ላይ...',
       loading_text: 'የፀሐይ ዑደቶችን እና የዛፍ ቀለበቶችን ታሪክ በመተንተን ላይ...',
       footer_text: 'ማጂ አለርት · ለቦረና ዞን የድርቅ ቅድመ ማስጠንቀቂያ ሥርዓት · አነስተኛ ባንድዊድዝ',
       err_geo_denied: 'የቦታ መረጃ ፈቃድ ተከልክሏል። እባክዎ መጋጠሚያዎችን በእጅ ያስገቡ።',
@@ -331,11 +334,15 @@
     return isValid ? { latitude: lat, longitude: lon, year: yr } : null;
   }
 
+  let isSubmitting = false;
+
   function setLoading(isLoading) {
     if (isLoading) {
+      isSubmitting = true;
       el.btnSubmit.disabled = true;
       el.btnSubmitText.textContent = translations[currentLang].btn_checking;
       el.btnSubmitSpinner.classList.remove('hidden');
+      el.processingMessage.textContent = translations[currentLang].loading_analyzing;
       el.processingCard.classList.remove('hidden');
       el.resultSection.classList.add('hidden');
       clearErrors();
@@ -347,6 +354,7 @@
         showGeneralError(translations[currentLang].err_timeout);
       }, CLIENT_TIMEOUT_MS);
     } else {
+      isSubmitting = false;
       if (clientTimeoutTimer) {
         clearTimeout(clientTimeoutTimer);
         clientTimeoutTimer = null;
@@ -369,7 +377,7 @@
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
-        timeout: 20000,
+        timeout: 60000,
       });
 
       socket.on('connect', () => {
@@ -422,6 +430,8 @@
   // =========================================================================
   el.form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent duplicate rapid clicks
+
     const validData = validateForm();
     if (!validData) return;
 

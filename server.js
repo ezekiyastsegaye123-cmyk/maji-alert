@@ -69,7 +69,7 @@ app.use('/api/', apiLimiter);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 6. Health Endpoint (Zero Secret Leakage)
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
   const dbState = mongoose.connection.readyState;
   const dbStatusMap = {
     0: 'disconnected',
@@ -78,6 +78,19 @@ app.get('/health', (req, res) => {
     3: 'disconnecting',
   };
 
+  let mlEngineStatus = 'unknown';
+  let timeout;
+  try {
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 1500);
+    const mlRes = await fetch(`${config.ML_SERVICE_URL}/ready`, { signal: controller.signal });
+    mlEngineStatus = mlRes.ok ? 'ready' : 'degraded';
+  } catch (_) {
+    mlEngineStatus = 'offline';
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+
   const healthData = {
     status: 'ok',
     service: 'Maji Alert API',
@@ -85,7 +98,7 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     components: {
       database: dbStatusMap[dbState] || 'unknown',
-      ml_engine: 'available',
+      ml_engine: mlEngineStatus,
     },
   };
 
@@ -147,10 +160,10 @@ app.post('/api/predict', async (req, res) => {
   }
 });
 
-// 8. Attach Socket.io with Matching CORS
+// 8. Attach Socket.io with Matching CORS and 60s pingTimeout
 const io = new Server(server, {
   cors: corsOptions,
-  pingTimeout: 30000,
+  pingTimeout: 60000,
   pingInterval: 25000,
 });
 

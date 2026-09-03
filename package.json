@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "ml:start": "./venv/bin/python predict_service.py --serve --port 8000",
+    "ml:test": "./venv/bin/pytest tests/test_predict_service.py -v",
     "test": "jest --runInBand --detectOpenHandles --testTimeout=30000"
   },
   "keywords": [],

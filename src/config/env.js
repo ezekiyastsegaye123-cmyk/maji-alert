@@ -13,6 +13,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const envSchema = z.object({
+  ML_SERVICE_URL: z.string().url().default('http://127.0.0.1:8000'),
+  ML_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(500).max(120000).default(10000),
   PORT: z.coerce.number().int().min(1024).max(65535).default(3000),
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/maji_alert'),
   PYTHON_EXECUTABLE: z.string().default(
@@ -34,6 +36,8 @@ let parsedConfig;
 
 try {
   parsedConfig = envSchema.parse({
+    ML_SERVICE_URL: process.env.ML_SERVICE_URL,
+    ML_REQUEST_TIMEOUT_MS: process.env.ML_REQUEST_TIMEOUT_MS,
     PORT: process.env.PORT,
     MONGODB_URI: process.env.MONGODB_URI,
     PYTHON_EXECUTABLE: process.env.PYTHON_EXECUTABLE,

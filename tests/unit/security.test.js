@@ -70,26 +70,22 @@ describe('Security Red-Team: Command Injection Neutralization', () => {
     });
   });
 
-  describe('Boundary Layer 2: Non-Shell Process Invocation (spawn with shell:false)', () => {
-    it(
-      'does not evaluate shell metacharacters even if passed directly to process wrapper',
-      async () => {
-        // Even if attacker somehow passes a string with shell operators directly to executePrediction:
-        try {
-          await executePrediction({
-            latitude: `4.88; touch ${canaryFile}`,
-            longitude: 38.08,
-            year: 2026,
-          });
-        } catch (err) {
-          // Expected to fail in python CLI argument parsing (ValueError or InvalidInputError)
-        }
+  describe('Boundary Layer 2: Complete Elimination of Child Process & Shell Invocations', () => {
+    it('does not invoke child_process or evaluate shell metacharacters', async () => {
+      // Even if attacker somehow passes a string with shell operators directly to executePrediction:
+      try {
+        await executePrediction({
+          latitude: `4.88; touch ${canaryFile}`,
+          longitude: 38.08,
+          year: 2026,
+        });
+      } catch (err) {
+        // Expected to fail at network/FastAPI layer
+      }
 
-        // CRITICAL ASSERTION: The canary file must NOT have been touched by a shell!
-        expect(fs.existsSync(canaryFile)).toBe(false);
-      },
-      20000
-    );
+      // CRITICAL ASSERTION: The canary file must NOT have been touched by a shell!
+      expect(fs.existsSync(canaryFile)).toBe(false);
+    });
   });
 
   describe('Boundary Layer 3: NoSQL / Type Confusion Injections', () => {

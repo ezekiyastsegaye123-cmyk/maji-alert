@@ -1,32 +1,41 @@
 """
-Test suite for Production Prediction Service (predict_service.py).
-==================================================================
+Production FastAPI Prediction Service Test Suite
+=================================================
+Validates the persistent FastAPI service, lifespan startup lifecycle,
+in-memory inference, and HTTP endpoint error boundaries.
 """
 
-import json
+import time
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from predict_service import (
     DroughtPredictionService,
     InvalidInputError,
+    ModelNotFoundError,
+    app,
+    lifespan,
     predict_drought,
 )
 
 
-class TestPredictionService:
+# =============================================================================
+# 1. Pure Python Domain / Service Tests
+# =============================================================================
+
+class TestPredictionServiceDomain:
     def test_predict_drought_valid_inputs(self):
         res = predict_drought(latitude=9.63, longitude=39.53, year=2005)
 
         assert isinstance(res, dict)
-        assert "predicted_drought_class" in res
         assert res["predicted_drought_class"] in {0, 1, 2}
-        assert "severity_label" in res
         assert res["severity_label"] in {"Normal", "Moderate Drought", "Severe Drought"}
         assert "confidence_probabilities" in res
         assert "grid_cell" in res
         assert res["year"] == 2005
         assert res["service_mode"] == "retrospective_reconstruction"
 
-        # Check probabilities
         probs = res["confidence_probabilities"]
         assert 0.0 <= probs["class_0"] <= 1.0
         assert 0.0 <= probs["class_1"] <= 1.0
@@ -61,67 +70,128 @@ class TestPredictionService:
         s1 = DroughtPredictionService.get_instance()
         s2 = DroughtPredictionService.get_instance()
         assert s1 is s2
-        assert s1._model is not None
+        assert s1.is_ready
 
 
-import threading
-import urllib.request
-import urllib.error
-from http.server import HTTPServer
-from predict_service import DroughtHTTPRequestHandler
+# =============================================================================
+# 2. FastAPI HTTP Endpoint Tests
+# =============================================================================
+
+class TestFastAPIEndpoints:
+    @pytest.fixture(scope="class")
+    def client(self):
+        """Initializes FastAPI client inside lifespan context."""
+        with TestClient(app) as test_client:
+            yield test_client
+
+    def test_health_liveness(self, client):
+        resp = client.get("/health")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "service" in data
+
+    def test_readiness_probe_healthy(self, client):
+        resp = client.get("/ready")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["ready"] is True
+        assert data["model_loaded"] is True
+        assert data["solar_data_loaded"] is True
+        assert data["spei_data_loaded"] is True
+
+    def test_get_predict_valid_query(self, client):
+        resp = client.get("/predict?latitude=4.88&longitude=38.08&year=2026")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["predicted_drought_class"] in {0, 1, 2}
+        assert data["year"] == 2026
+        assert data["service_mode"] == "prospective_solar_projection"
+        assert data["grid_cell"]["requested_lat"] == 4.88
+        assert data["grid_cell"]["requested_lon"] == 38.08
+        assert "selected_lat" in data["grid_cell"]
+        assert "distance_km" in data["grid_cell"]
+
+    def test_get_predict_missing_parameters(self, client):
+        # Missing year
+        resp = client.get("/predict?latitude=4.88&longitude=38.08")
+        assert resp.status_code == 422
+
+        # Missing latitude and longitude
+        resp = client.get("/predict")
+        assert resp.status_code == 422
+
+    def test_get_predict_invalid_coordinates(self, client):
+        # Latitude out of bounds
+        resp = client.get("/predict?latitude=95.0&longitude=38.08&year=2026")
+        assert resp.status_code == 422
+
+        # Longitude out of bounds
+        resp = client.get("/predict?latitude=4.88&longitude=190.0&year=2026")
+        assert resp.status_code == 422
+
+    def test_get_predict_invalid_year(self, client):
+        resp = client.get("/predict?latitude=4.88&longitude=38.08&year=1500")
+        assert resp.status_code == 422
+
+        resp = client.get("/predict?latitude=4.88&longitude=38.08&year=2500")
+        assert resp.status_code == 422
+
+    def test_post_predict_valid_json(self, client):
+        payload = {"latitude": 9.63, "longitude": 39.53, "year": 2005}
+        resp = client.post("/predict", json=payload)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["predicted_drought_class"] in {0, 1, 2}
+        assert data["year"] == 2005
+        assert data["service_mode"] == "retrospective_reconstruction"
+
+    def test_post_predict_invalid_payload(self, client):
+        # Bad types
+        resp = client.post("/predict", json={"latitude": "invalid", "longitude": 38.08, "year": 2026})
+        assert resp.status_code == 422
+
+        # Out of bounds
+        resp = client.post("/predict", json={"latitude": 100.0, "longitude": 38.08, "year": 2026})
+        assert resp.status_code == 422
+
+    def test_cold_start_elimination(self, client):
+        """Verifies that consecutive predictions complete rapidly without re-initialization overhead."""
+        # Issue first prediction
+        t0 = time.time()
+        r1 = client.get("/predict?latitude=4.88&longitude=38.08&year=2026")
+        dt1 = (time.time() - t0) * 1000
+        assert r1.status_code == 200
+
+        # Issue second prediction
+        t1 = time.time()
+        r2 = client.get("/predict?latitude=9.63&longitude=39.53&year=2005")
+        dt2 = (time.time() - t1) * 1000
+        assert r2.status_code == 200
+
+        # Both must be well below the old cold-start 16,000ms threshold
+        assert dt1 < 2000  # < 2 seconds
+        assert dt2 < 2000  # < 2 seconds
 
 
-@pytest.fixture(scope="module")
-def http_server():
-    server = HTTPServer(("127.0.0.1", 0), DroughtHTTPRequestHandler)
-    port = server.server_port
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    yield f"http://127.0.0.1:{port}"
-    server.shutdown()
-    server.server_close()
+# =============================================================================
+# 3. Startup Failure & Degraded State Tests
+# =============================================================================
 
+class TestStartupFailureBehavior:
+    def test_startup_missing_model_fails_gracefully(self):
+        """Verifies that an uninitialized/failed app returns 503 on /ready."""
+        mock_app = FastAPI()
+        mock_app.state.is_ready = False
+        mock_app.state.service = None
+        mock_app.state.startup_error = "Model file corrupted or missing."
 
-class TestDroughtHTTPServer:
-    def test_get_root_health_check(self, http_server):
-        req = urllib.request.Request(f"{http_server}/")
-        with urllib.request.urlopen(req) as resp:
-            assert resp.status == 200
-            data = json.loads(resp.read().decode("utf-8"))
-            assert data["status"] == "online"
-            assert "POST /predict" in data["endpoints"]
-            assert "GET /predict" in data["endpoints"]
+        from predict_service import readiness_check
+        mock_app.get("/ready")(readiness_check)
 
-    def test_get_predict_valid_query(self, http_server):
-        url = f"{http_server}/predict?lat=9.63&lon=39.53&year=2005"
-        req = urllib.request.Request(url)
-        with urllib.request.urlopen(req) as resp:
-            assert resp.status == 200
-            data = json.loads(resp.read().decode("utf-8"))
-            assert "predicted_drought_class" in data
-            assert data["year"] == 2005
-            assert data["severity_label"] in {"Normal", "Moderate Drought", "Severe Drought"}
-
-    def test_get_predict_missing_params(self, http_server):
-        url = f"{http_server}/predict"
-        req = urllib.request.Request(url)
-        with pytest.raises(urllib.error.HTTPError) as exc_info:
-            urllib.request.urlopen(req)
-        assert exc_info.value.code == 400
-
-    def test_post_predict_valid_json(self, http_server):
-        url = f"{http_server}/predict"
-        payload = json.dumps({"latitude": 9.63, "longitude": 39.53, "year": 2005}).encode("utf-8")
-        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req) as resp:
-            assert resp.status == 200
-            data = json.loads(resp.read().decode("utf-8"))
-            assert "predicted_drought_class" in data
-            assert data["year"] == 2005
-
-    def test_options_cors(self, http_server):
-        url = f"{http_server}/predict"
-        req = urllib.request.Request(url, method="OPTIONS")
-        with urllib.request.urlopen(req) as resp:
-            assert resp.status == 204
-            assert resp.headers.get("Access-Control-Allow-Origin") == "*"
+        with TestClient(mock_app) as client:
+            resp = client.get("/ready")
+            assert resp.status_code == 503
+            data = resp.json()
+            assert data["detail"]["ready"] is False
+            assert "Model file corrupted" in data["detail"]["error"]
