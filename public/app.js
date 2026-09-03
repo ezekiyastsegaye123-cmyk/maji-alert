@@ -44,6 +44,7 @@
       advisory_severe: 'CRITICAL: Severe drought phase projected. Enforce emergency water rationing for pastoral herds and prioritize human consumption.',
       confidence_breakdown: 'Model Confidence Probabilities',
       model_confidence: 'Model Confidence:',
+      total_drought_risk: 'Total Drought Risk:',
       class_normal: 'Normal / Wet',
       class_moderate: 'Moderate Drought',
       class_severe: 'Severe Drought',
@@ -92,6 +93,7 @@
       advisory_severe: 'AKEERRA: Hongee cimaan ni dhufa! Bishaan beeyladaaf qusadhaa, dhala namaaf dursa kennaa.',
       confidence_breakdown: 'Hammamtaa Rakkinaa (Probabilities)',
       model_confidence: 'Amanamummaa Moodeelaa:',
+      total_drought_risk: 'Waliigala Risaa Hongee:',
       class_normal: 'Nagaya / Rooba',
       class_moderate: 'Hongee Giddu-galeessa',
       class_severe: 'Hongee Hamaa',
@@ -140,6 +142,7 @@
       advisory_severe: 'አስቸኳይ ማስጠንቀቂያ: ከፍተኛ ድርቅ ይጠበቃል! የአስቸኳይ ጊዜ ውኃ ቁጠባ ይተግብሩ እና ቅድሚያ ለሰው ልጅ ይስጡ።',
       confidence_breakdown: 'የሞዴል ትንበያ ዕድሎች',
       model_confidence: 'የሞዴል እርግጠኝነት:',
+      total_drought_risk: 'አጠቃላይ የድርቅ ስጋት:',
       class_normal: 'መደበኛ / እርጥብ',
       class_moderate: 'መካከለኛ ድርቅ',
       class_severe: 'ከባድ ድርቅ',
@@ -191,6 +194,7 @@
     gaugeIcon: document.getElementById('gaugeIcon'),
     severityLabel: document.getElementById('severityLabel'),
     modelConfidenceText: document.getElementById('modelConfidenceText'),
+    totalDroughtRiskText: document.getElementById('totalDroughtRiskText'),
     pumpAdvisory: document.getElementById('pumpAdvisory'),
     probNormalText: document.getElementById('probNormalText'),
     probModerateText: document.getElementById('probModerateText'),
@@ -536,6 +540,15 @@
     const confPercent = Math.round(rawConf * 100);
     if (el.modelConfidenceText) {
       el.modelConfidenceText.textContent = `${confPercent}%`;
+    }
+
+    // 2c. Display aggregate drought risk percentage (Moderate + Severe)
+    let droughtRisk = result.combined_drought_risk;
+    if (typeof droughtRisk !== 'number' && probs) {
+      droughtRisk = (probs.class_1 || 0) + (probs.class_2 || 0);
+    }
+    if (el.totalDroughtRiskText && typeof droughtRisk === 'number') {
+      el.totalDroughtRiskText.textContent = `${Math.round(droughtRisk * 100)}%`;
     }
 
     // 3. Confidence probabilities

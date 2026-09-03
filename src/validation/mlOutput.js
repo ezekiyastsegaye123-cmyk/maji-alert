@@ -36,6 +36,7 @@ const mlOutputSchema = z.object({
   severity_label: z.string().min(1),
   confidence_probabilities: confidenceProbabilitiesSchema,
   model_confidence: z.number().min(0.0).max(1.0).optional(),
+  combined_drought_risk: z.number().min(0.0).max(1.0).optional(),
   grid_cell: gridCellSchema,
   year: z.number().int(),
   service_mode: z.string(),

@@ -186,9 +186,9 @@ class SolarCyclePhaseCalculator:
 
 
 class DroughtFeatureEngineer:
-    """Engineers causal predictors from Sunspot, Tree-Ring (RWI), and SPEI records."""
+    """Engineers causal predictors from Sunspot, Tree-Ring (RWI), Ocean Indices (ENSO/IOD), and SPEI records."""
 
-    FEATURE_NAMES: List[str] = [
+    BASE_FEATURE_NAMES: List[str] = [
         "sunspot",
         "sunspot_lag1",
         "sunspot_lag2",
@@ -206,6 +206,13 @@ class DroughtFeatureEngineer:
         "rwi_diff1",
         "rwi_smooth5",
     ]
+
+    OCEAN_FEATURE_NAMES: List[str] = [
+        "nino34_mean",
+        "dmi_mean",
+    ]
+
+    FEATURE_NAMES: List[str] = BASE_FEATURE_NAMES + OCEAN_FEATURE_NAMES
 
     def __init__(
         self,
@@ -275,9 +282,10 @@ class DroughtFeatureEngineer:
         df_chronology: pd.DataFrame,
         df_solar: pd.DataFrame,
         df_spei: pd.DataFrame,
+        df_ocean: Optional[pd.DataFrame] = None,
     ) -> pd.DataFrame:
         """
-        Merge chronology, solar features, and SPEI ground-truth into aligned training set.
+        Merge chronology, solar features, SPEI ground-truth, and ocean indices into aligned training set.
         """
         if "year" not in df_spei.columns or "spei" not in df_spei.columns:
             raise FeatureEngineeringError("SPEI DataFrame must contain 'year' and 'spei' columns.")
@@ -286,9 +294,20 @@ class DroughtFeatureEngineer:
         df_spei_clean["year"] = df_spei_clean["year"].astype(int)
         df_spei_clean["spei"] = df_spei_clean["spei"].astype(float)
 
-        # Merge
+        # Merge chronology, solar, and SPEI
         merged = pd.merge(df_chronology, df_solar, on="year", how="inner")
         merged = pd.merge(merged, df_spei_clean, on="year", how="inner").sort_values("year").reset_index(drop=True)
+
+        # Merge ocean teleconnection features if provided
+        if df_ocean is not None:
+            merged = pd.merge(merged, df_ocean, on="year", how="left")
+
+        # Fill neutral climatology (0.0 anomaly) for any missing ocean features
+        for f in self.OCEAN_FEATURE_NAMES:
+            if f not in merged.columns:
+                merged[f] = 0.0
+            else:
+                merged[f] = merged[f].fillna(0.0)
 
         if len(merged) < 20:
             raise FeatureEngineeringError(f"Insufficient merged training samples: {len(merged)} rows found.")
@@ -301,7 +320,7 @@ class DroughtFeatureEngineer:
             if f not in merged.columns:
                 raise FeatureEngineeringError(f"Missing required feature column: {f}")
             if merged[f].isna().any():
-                merged[f] = merged[f].bfill().ffill()
+                merged[f] = merged[f].bfill().ffill().fillna(0.0)
 
         return merged
 
@@ -516,6 +535,8 @@ class DroughtForecaster:
                 "rwi_lag1": curr_rwi_lag1,
                 "rwi_diff1": rwi_diff,
                 "rwi_smooth5": rwi_smooth5,
+                "nino34_mean": 0.0,
+                "dmi_mean": 0.0,
             }
 
             x_vec = np.array([[feat_dict[f] for f in DroughtFeatureEngineer.FEATURE_NAMES]])

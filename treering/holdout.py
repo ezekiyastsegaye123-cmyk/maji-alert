@@ -100,10 +100,11 @@ def train_and_save_gondar_model(
     rwl_path: Union[str, Path] = "africa/eth007.rwl",
     sunspot_path: Union[str, Path] = "SN_y_tot_V2.0.csv",
     netcdf_path: Union[str, Path] = "data/spei01.nc",
+    ocean_csv_path: Optional[Union[str, Path]] = "data/ocean_indices_annual.csv",
     model_output_path: Union[str, Path] = "models/random_forest_eth007.joblib",
     metadata_output_path: Union[str, Path] = "models/eth007_model_metadata.json",
     n_estimators: int = 300,
-    max_depth: int = 4,
+    max_depth: int = 6,
     class_weight: Optional[Union[str, Dict[Any, Any]]] = None,
     random_state: int = 42,
     overwrite: bool = True,
@@ -137,11 +138,16 @@ def train_and_save_gondar_model(
     gondar_spei_res = extract_annual_spei(netcdf_path, lat=13.01, lon=37.80)
     df_spei = gondar_spei_res.annual_df
 
+    # 3b. Load Ocean Indices if available
+    df_ocean = None
+    if ocean_csv_path and Path(ocean_csv_path).exists():
+        df_ocean = pd.read_csv(ocean_csv_path)
+
     # 4. Feature engineering
     engineer = DroughtFeatureEngineer()
     df_chron = engineer.build_tree_ring_chronology(chron_df)
     df_solar = engineer.build_solar_feature_table(df_sun)
-    df_train = engineer.build_training_dataset(df_chron, df_solar, df_spei)
+    df_train = engineer.build_training_dataset(df_chron, df_solar, df_spei, df_ocean=df_ocean)
 
     df_train["target_3class"] = [classify_spei_calibrated_3class(s) for s in df_train["spei"]]
 
@@ -206,6 +212,7 @@ def evaluate_geographic_holdout(
     holdout_rwl_path: Union[str, Path] = "africa/eth001.rwl",
     sunspot_path: Union[str, Path] = "SN_y_tot_V2.0.csv",
     netcdf_path: Union[str, Path] = "data/spei01.nc",
+    ocean_csv_path: Optional[Union[str, Path]] = "data/ocean_indices_annual.csv",
     model_path: Union[str, Path] = "models/random_forest_eth007.joblib",
     output_dir: Union[str, Path] = "outputs",
 ) -> Dict[str, Any]:
@@ -241,11 +248,16 @@ def evaluate_geographic_holdout(
     debre_spei_res = extract_annual_spei(netcdf_path, lat=9.63, lon=39.53)
     df_debre_spei = debre_spei_res.annual_df
 
+    # 4b. Load Ocean Indices if available
+    df_ocean = None
+    if ocean_csv_path and Path(ocean_csv_path).exists():
+        df_ocean = pd.read_csv(ocean_csv_path)
+
     # 5. Build feature matrix using identical pipeline
     engineer = DroughtFeatureEngineer()
     df_chron = engineer.build_tree_ring_chronology(chron_001)
     df_solar = engineer.build_solar_feature_table(df_sun)
-    df_holdout = engineer.build_training_dataset(df_chron, df_solar, df_debre_spei)
+    df_holdout = engineer.build_training_dataset(df_chron, df_solar, df_debre_spei, df_ocean=df_ocean)
 
     # Targets
     df_holdout["actual_class_strict"] = [classify_spei_strict_3class(s) for s in df_holdout["spei"]]

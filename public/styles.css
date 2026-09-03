@@ -445,6 +445,12 @@ input:focus-visible {
   padding: 4px 10px;
   background: rgba(0, 0, 0, 0.06);
   border-radius: var(--radius);
+  flex-wrap: wrap;
+}
+
+.confidence-separator {
+  opacity: 0.4;
+  margin: 0 2px;
 }
 
 /* Probability block */

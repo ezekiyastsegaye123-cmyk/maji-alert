@@ -42,34 +42,35 @@
     "rwi",
     "rwi_lag1",
     "rwi_diff1",
-    "rwi_smooth5"
+    "rwi_smooth5",
+    "nino34_mean",
+    "dmi_mean"
   ],
-  "feature_count": 16,
+  "feature_count": 18,
   "hyperparameters": {
     "n_estimators": 300,
-    "max_depth": 4,
+    "max_depth": 6,
     "class_weight": null,
     "random_state": 42
   },
   "feature_importances": {
-    "sunspot": 0.07301569368545811,
-    "sunspot_lag1": 0.05108912247909644,
-    "sunspot_lag2": 0.09130531585645231,
-    "sunspot_lag3": 0.053584239301126005,
-    "sunspot_lag4": 0.05457677582500054,
-    "sunspot_lag5": 0.06371495041542609,
-    "sunspot_smooth11": 0.14610892665783964,
-    "sunspot_diff1": 0.04325837511083825,
-    "sunspot_diff3": 0.04952096416355536,
-    "solar_phase": 0.03269251589176319,
-    "solar_phase_sin": 0.04234566575339554,
-    "solar_phase_cos": 0.04879088386095809,
-    "rwi": 0.05673515722976004,
-    "rwi_lag1": 0.04858271980452459,
-    "rwi_diff1": 0.07441373175627723,
-    "rwi_smooth5": 0.0702649622085286
-  },
-  "python_version": "3.13.15",
-  "scikit_learn_version": "1.9.0",
-  "sha256": "ce3cfb31787e8e61355a62f1602694e2cf0d51249ed5ba4870a9e7299e7fa9ba"
+    "sunspot": 0.06252611368325128,
+    "sunspot_lag1": 0.05115845256360706,
+    "sunspot_lag2": 0.075480118303334,
+    "sunspot_lag3": 0.05520752576515998,
+    "sunspot_lag4": 0.055158310363986184,
+    "sunspot_lag5": 0.05392316684103308,
+    "sunspot_smooth11": 0.11344295863073528,
+    "sunspot_diff1": 0.044064042757094496,
+    "sunspot_diff3": 0.043216461813802426,
+    "solar_phase": 0.03100110739987216,
+    "solar_phase_sin": 0.033754354037404476,
+    "solar_phase_cos": 0.034182660024455004,
+    "rwi": 0.041404541405159014,
+    "rwi_lag1": 0.04921779978452506,
+    "rwi_diff1": 0.06301706484692422,
+    "rwi_smooth5": 0.06140664488286583,
+    "nino34_mean": 0.06842495193998838,
+    "dmi_mean": 0.06341372495680188
+  }
 }

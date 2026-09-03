@@ -106,6 +106,7 @@ logger = logging.getLogger("predict_service")
 DEFAULT_MODEL_PATH = Path("models/random_forest_eth007.joblib")
 DEFAULT_SUNSPOT_PATH = Path("SN_y_tot_V2.0.csv")
 DEFAULT_NETCDF_PATH = Path("data/spei01.nc")
+DEFAULT_OCEAN_PATH = Path("data/ocean_indices_annual.csv")
 
 SEVERITY_LABELS: Dict[int, str] = {
     0: "Normal",
@@ -159,6 +160,7 @@ class PredictionResponse(BaseModel):
     severity_label: str
     confidence_probabilities: Dict[str, float]
     model_confidence: Optional[float] = None
+    combined_drought_risk: Optional[float] = None
     grid_cell: GridCellInfo
     year: int
     service_mode: str
@@ -178,13 +180,16 @@ class DroughtPredictionService:
         model_path: Union[str, Path] = DEFAULT_MODEL_PATH,
         sunspot_path: Union[str, Path] = DEFAULT_SUNSPOT_PATH,
         netcdf_path: Union[str, Path] = DEFAULT_NETCDF_PATH,
+        ocean_path: Union[str, Path] = DEFAULT_OCEAN_PATH,
     ):
         self.model_path = Path(model_path)
         self.sunspot_path = Path(sunspot_path)
         self.netcdf_path = Path(netcdf_path)
+        self.ocean_path = Path(ocean_path)
 
         self._model: Optional[RandomForestClassifier] = None
         self._df_solar: Optional[pd.DataFrame] = None
+        self._df_ocean: Optional[pd.DataFrame] = None
         self._spei_ds: Optional[xr.Dataset] = None
         self._spei_lats: Optional[np.ndarray] = None
         self._spei_lons: Optional[np.ndarray] = None
@@ -198,9 +203,10 @@ class DroughtPredictionService:
         model_path: Union[str, Path] = DEFAULT_MODEL_PATH,
         sunspot_path: Union[str, Path] = DEFAULT_SUNSPOT_PATH,
         netcdf_path: Union[str, Path] = DEFAULT_NETCDF_PATH,
+        ocean_path: Union[str, Path] = DEFAULT_OCEAN_PATH,
     ) -> DroughtPredictionService:
         if cls._instance is None:
-            cls._instance = cls(model_path, sunspot_path, netcdf_path)
+            cls._instance = cls(model_path, sunspot_path, netcdf_path, ocean_path)
             cls._instance.initialize()
         return cls._instance
 
@@ -291,6 +297,24 @@ class DroughtPredictionService:
         else:
             logger.warning("NetCDF dataset not found at %s. Operating with mathematical grid projection.", self.netcdf_path)
             self._spei_ds = None
+
+        # 4. Load Ocean Teleconnection Indices (ENSO / IOD)
+        logger.info("Loading Ocean Indices dataset from: %s", self.ocean_path)
+        if self.ocean_path.exists():
+            try:
+                self._df_ocean = pd.read_csv(self.ocean_path)
+                logger.info(
+                    "Successfully loaded ocean indices (%d records: %d to %d)",
+                    len(self._df_ocean),
+                    int(self._df_ocean["year"].min()),
+                    int(self._df_ocean["year"].max()),
+                )
+            except Exception as exc:
+                logger.warning("Failed to load ocean indices: %s. Using neutral anomaly fallback.", exc)
+                self._df_ocean = None
+        else:
+            logger.warning("Ocean indices dataset not found at %s. Using neutral anomaly fallback.", self.ocean_path)
+            self._df_ocean = None
 
         self._initialized = True
         duration = time.time() - start_time
@@ -397,6 +421,15 @@ class DroughtPredictionService:
         rwi_diff1_val = 0.0
         rwi_smooth5_val = 1.0
 
+        # 3b. Extract Ocean Teleconnections (ENSO / IOD)
+        nino_val = 0.0
+        dmi_val = 0.0
+        if self._df_ocean is not None:
+            oc_rows = self._df_ocean[self._df_ocean["year"] == yr]
+            if len(oc_rows) > 0:
+                nino_val = float(oc_rows.iloc[0].get("nino34_mean", 0.0))
+                dmi_val = float(oc_rows.iloc[0].get("dmi_mean", 0.0))
+
         feat_dict = {
             "sunspot": float(sun_row["sunspot"]),
             "sunspot_lag1": float(sun_row["sunspot_lag1"]),
@@ -414,6 +447,8 @@ class DroughtPredictionService:
             "rwi_lag1": rwi_lag1_val,
             "rwi_diff1": rwi_diff1_val,
             "rwi_smooth5": rwi_smooth5_val,
+            "nino34_mean": nino_val,
+            "dmi_mean": dmi_val,
         }
 
         # Construct vector preserving training feature schema exactly
@@ -472,6 +507,7 @@ class DroughtPredictionService:
             "severity_label": severity,
             "confidence_probabilities": prob_map,
             "model_confidence": round(float(confidence_val), 4),
+            "combined_drought_risk": round(float(p1 + p2), 4),
             "grid_cell": grid_info,
             "year": yr,
             "service_mode": service_mode,
@@ -585,6 +621,7 @@ async def readiness_check(request: Request):
             "model_loaded": service._model is not None,
             "solar_data_loaded": service._df_solar is not None,
             "spei_data_loaded": service._spei_lats is not None,
+            "ocean_data_loaded": service._df_ocean is not None,
         }
 
     startup_err = getattr(request.app.state, "startup_error", "Service is still initializing.")
@@ -596,6 +633,7 @@ async def readiness_check(request: Request):
             "model_loaded": False,
             "solar_data_loaded": False,
             "spei_data_loaded": False,
+            "ocean_data_loaded": False,
         },
     )
 
