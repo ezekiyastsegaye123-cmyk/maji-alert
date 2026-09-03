@@ -104,6 +104,7 @@ def train_and_save_gondar_model(
     metadata_output_path: Union[str, Path] = "models/eth007_model_metadata.json",
     n_estimators: int = 300,
     max_depth: int = 4,
+    class_weight: Optional[Union[str, Dict[Any, Any]]] = None,
     random_state: int = 42,
     overwrite: bool = True,
 ) -> Tuple[RandomForestClassifier, Dict[str, Any]]:
@@ -151,7 +152,7 @@ def train_and_save_gondar_model(
     rf = RandomForestClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
-        class_weight="balanced",
+        class_weight=class_weight,
         random_state=random_state,
     )
     rf.fit(X_train, y_train)
@@ -166,6 +167,7 @@ def train_and_save_gondar_model(
 
     metadata = {
         "model_name": "Random Forest Gondar Training Model",
+        "model_type": "RandomForestClassifier",
         "training_site": "Gondar (eth007)",
         "training_coordinates": {"latitude": 13.01, "longitude": 37.80},
         "selected_spei_grid_cell": {
@@ -176,11 +178,13 @@ def train_and_save_gondar_model(
         "training_period": [int(df_train["year"].min()), int(df_train["year"].max())],
         "n_samples": len(df_train),
         "class_distribution": pd.Series(y_train).value_counts().to_dict(),
+        "classes_": [int(c) for c in rf.classes_],
         "feature_names": DroughtFeatureEngineer.FEATURE_NAMES,
+        "feature_count": len(DroughtFeatureEngineer.FEATURE_NAMES),
         "hyperparameters": {
             "n_estimators": n_estimators,
             "max_depth": max_depth,
-            "class_weight": "balanced",
+            "class_weight": class_weight,
             "random_state": random_state,
         },
         "feature_importances": feature_importances,

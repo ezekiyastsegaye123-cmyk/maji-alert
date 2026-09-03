@@ -1,0 +1,65 @@
+{
+  "model_name": "Random Forest Gondar Training Model",
+  "training_site": "Gondar (eth007)",
+  "training_coordinates": {
+    "latitude": 13.01,
+    "longitude": 37.8
+  },
+  "selected_spei_grid_cell": {
+    "latitude": 13.25,
+    "longitude": 37.75,
+    "distance_km": 27.23053556351907
+  },
+  "training_period": [
+    1901,
+    2014
+  ],
+  "n_samples": 114,
+  "class_distribution": {
+    "0": 70,
+    "1": 28,
+    "2": 16
+  },
+  "feature_names": [
+    "sunspot",
+    "sunspot_lag1",
+    "sunspot_lag2",
+    "sunspot_lag3",
+    "sunspot_lag4",
+    "sunspot_lag5",
+    "sunspot_smooth11",
+    "sunspot_diff1",
+    "sunspot_diff3",
+    "solar_phase",
+    "solar_phase_sin",
+    "solar_phase_cos",
+    "rwi",
+    "rwi_lag1",
+    "rwi_diff1",
+    "rwi_smooth5"
+  ],
+  "hyperparameters": {
+    "n_estimators": 300,
+    "max_depth": 4,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "feature_importances": {
+    "sunspot": 0.059939179138226176,
+    "sunspot_lag1": 0.09562244899693075,
+    "sunspot_lag2": 0.07666663205670782,
+    "sunspot_lag3": 0.040877213749005235,
+    "sunspot_lag4": 0.0558011954566901,
+    "sunspot_lag5": 0.06809248664631071,
+    "sunspot_smooth11": 0.12282433265474706,
+    "sunspot_diff1": 0.06032225358764749,
+    "sunspot_diff3": 0.03497891818275861,
+    "solar_phase": 0.04054872078891537,
+    "solar_phase_sin": 0.019245615500239663,
+    "solar_phase_cos": 0.052334966972526764,
+    "rwi": 0.082924807974867,
+    "rwi_lag1": 0.0424268747593999,
+    "rwi_diff1": 0.09595283458855988,
+    "rwi_smooth5": 0.051441518946467424
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "site": "Gondar (eth007)",
+  "in_sample_evaluation": [
+    {
+      "threshold": 0.5,
+      "predicted_count": 6,
+      "tp": 6,
+      "fp": 0,
+      "fn": 10,
+      "precision": 1.0,
+      "recall": 0.375,
+      "f1": 0.5454545454545454
+    },
+    {
+      "threshold": 0.55,
+      "predicted_count": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 14,
+      "precision": 1.0,
+      "recall": 0.125,
+      "f1": 0.2222222222222222
+    },
+    {
+      "threshold": 0.6,
+      "predicted_count": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 15,
+      "precision": 1.0,
+      "recall": 0.0625,
+      "f1": 0.11764705882352941
+    },
+    {
+      "threshold": 0.65,
+      "predicted_count": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 15,
+      "precision": 1.0,
+      "recall": 0.0625,
+      "f1": 0.11764705882352941
+    },
+    {
+      "threshold": 0.7,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 16,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "timeseries_cv_evaluation": [
+    {
+      "threshold": 0.5,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.55,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.6,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.65,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "predicted_count": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 13,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "production_decision_rule": "IF P(Class 2) > 0.60: Class 2; ELSE: argmax(P(Class 0), P(Class 1))"
+}

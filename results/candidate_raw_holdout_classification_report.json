@@ -1,0 +1,47 @@
+{
+  "model_artifact": "models/random_forest_eth007.joblib",
+  "class_weight": null,
+  "rule": "model.predict() [raw argmax]",
+  "accuracy": 0.6132075471698113,
+  "balanced_accuracy": 0.3564102564102564,
+  "macro_f1": 0.3130050505050505,
+  "weighted_f1": 0.506825328759291,
+  "confusion_matrix": [
+    [
+      62,
+      3,
+      0
+    ],
+    [
+      23,
+      3,
+      0
+    ],
+    [
+      15,
+      0,
+      0
+    ]
+  ],
+  "class_0": {
+    "precision": 0.62,
+    "recall": 0.9538461538461539,
+    "f1": 0.7515151515151515,
+    "support": 65
+  },
+  "class_1": {
+    "precision": 0.5,
+    "recall": 0.11538461538461539,
+    "f1": 0.1875,
+    "support": 26
+  },
+  "class_2": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 15,
+    "tp": 0,
+    "fp": 0,
+    "fn": 15
+  }
+}

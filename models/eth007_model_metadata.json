@@ -1,5 +1,6 @@
 {
   "model_name": "Random Forest Gondar Training Model",
+  "model_type": "RandomForestClassifier",
   "training_site": "Gondar (eth007)",
   "training_coordinates": {
     "latitude": 13.01,
@@ -20,6 +21,11 @@
     "1": 28,
     "2": 16
   },
+  "classes_": [
+    0,
+    1,
+    2
+  ],
   "feature_names": [
     "sunspot",
     "sunspot_lag1",
@@ -38,28 +44,32 @@
     "rwi_diff1",
     "rwi_smooth5"
   ],
+  "feature_count": 16,
   "hyperparameters": {
     "n_estimators": 300,
     "max_depth": 4,
-    "class_weight": "balanced",
+    "class_weight": null,
     "random_state": 42
   },
   "feature_importances": {
-    "sunspot": 0.059939179138226176,
-    "sunspot_lag1": 0.09562244899693075,
-    "sunspot_lag2": 0.07666663205670782,
-    "sunspot_lag3": 0.040877213749005235,
-    "sunspot_lag4": 0.0558011954566901,
-    "sunspot_lag5": 0.06809248664631071,
-    "sunspot_smooth11": 0.12282433265474706,
-    "sunspot_diff1": 0.06032225358764749,
-    "sunspot_diff3": 0.03497891818275861,
-    "solar_phase": 0.04054872078891537,
-    "solar_phase_sin": 0.019245615500239663,
-    "solar_phase_cos": 0.052334966972526764,
-    "rwi": 0.082924807974867,
-    "rwi_lag1": 0.0424268747593999,
-    "rwi_diff1": 0.09595283458855988,
-    "rwi_smooth5": 0.051441518946467424
-  }
+    "sunspot": 0.07301569368545811,
+    "sunspot_lag1": 0.05108912247909644,
+    "sunspot_lag2": 0.09130531585645231,
+    "sunspot_lag3": 0.053584239301126005,
+    "sunspot_lag4": 0.05457677582500054,
+    "sunspot_lag5": 0.06371495041542609,
+    "sunspot_smooth11": 0.14610892665783964,
+    "sunspot_diff1": 0.04325837511083825,
+    "sunspot_diff3": 0.04952096416355536,
+    "solar_phase": 0.03269251589176319,
+    "solar_phase_sin": 0.04234566575339554,
+    "solar_phase_cos": 0.04879088386095809,
+    "rwi": 0.05673515722976004,
+    "rwi_lag1": 0.04858271980452459,
+    "rwi_diff1": 0.07441373175627723,
+    "rwi_smooth5": 0.0702649622085286
+  },
+  "python_version": "3.13.15",
+  "scikit_learn_version": "1.9.0",
+  "sha256": "ce3cfb31787e8e61355a62f1602694e2cf0d51249ed5ba4870a9e7299e7fa9ba"
 }

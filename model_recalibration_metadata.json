@@ -1,0 +1,48 @@
+{
+  "model_path": "models/random_forest_eth007.joblib",
+  "model_hash_sha256": "ce3cfb31787e8e61355a62f1602694e2cf0d51249ed5ba4870a9e7299e7fa9ba",
+  "classes": [
+    0,
+    1,
+    2
+  ],
+  "feature_names": [
+    "sunspot",
+    "sunspot_lag1",
+    "sunspot_lag2",
+    "sunspot_lag3",
+    "sunspot_lag4",
+    "sunspot_lag5",
+    "sunspot_smooth11",
+    "sunspot_diff1",
+    "sunspot_diff3",
+    "solar_phase",
+    "solar_phase_sin",
+    "solar_phase_cos",
+    "rwi",
+    "rwi_lag1",
+    "rwi_diff1",
+    "rwi_smooth5"
+  ],
+  "feature_count": 16,
+  "class_2_threshold": 0.6,
+  "threshold_operator": ">",
+  "class_2_rule": "P(Class 2) > 0.60",
+  "fallback_rule": "argmax over Class 0 and Class 1",
+  "training_site": "eth007",
+  "training_coordinates": {
+    "latitude": 13.01,
+    "longitude": 37.8
+  },
+  "holdout_site": "eth001",
+  "holdout_coordinates": {
+    "latitude": 9.63,
+    "longitude": 39.53
+  },
+  "geographic_distance_km": 412.5,
+  "training_samples": 114,
+  "holdout_samples": 106,
+  "python_version": "3.13.15",
+  "scikit_learn_version": "1.9.0",
+  "phase_1_status": "PHASE 1 READY FOR PHASE 2"
+}
