@@ -65,8 +65,20 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// 5. Static Assets (Low-bandwidth frontend)
-app.use(express.static(path.join(__dirname, 'public')));
+// 5. Static Assets (Low-bandwidth frontend with cache control)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
+app.use(
+  express.static(path.join(__dirname, 'public'), {
+    etag: false,
+    maxAge: 0,
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    },
+  })
+);
 
 // 6. Health Endpoint (Zero Secret Leakage)
 app.get('/health', async (req, res) => {

@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Maji Alert: Solar Groundwater Pump Drought Early Warning System for Borana Zone, Ethiopia.">
   <title>Maji Alert — Drought Early Warning</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+  <link rel="stylesheet" href="styles.css?v=2.0.1">
 </head>
 <body>
   <div class="app-container">
@@ -35,6 +36,11 @@
     </header>
 
     <main id="mainContent" role="main">
+      <!-- File Protocol Warning (Visible only when opened via file://) -->
+      <div id="fileProtocolWarning" class="alert-banner warning-banner hidden" style="margin-bottom: 1.25rem; background: #2c2202; color: #ffeb85; border: 1px solid #755f11; padding: 0.75rem 1rem; border-radius: 8px;" role="alert">
+        ℹ️ <strong>Tip:</strong> You opened this page directly as a local file. For real-time websockets and optimal performance, navigate to <a href="http://localhost:3000" style="color: #60a5fa; font-weight: bold; text-decoration: underline;">http://localhost:3000</a>.
+      </div>
+
       <!-- Input Section -->
       <section class="card input-section" aria-labelledby="inputSectionTitle">
         <h2 id="inputSectionTitle" class="section-title" data-i18n="section_location">Target Location & Coordinates</h2>
@@ -217,6 +223,6 @@
 
   <!-- Zero external CDN dependency: Socket.io served from local backend -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2.0.1"></script>
 </body>
 </html>

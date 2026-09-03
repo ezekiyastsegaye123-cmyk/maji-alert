@@ -366,14 +366,24 @@
     }
   }
 
+  const SERVER_ORIGIN =
+    window.location.protocol === 'file:' || !window.location.host
+      ? 'http://localhost:3000'
+      : window.location.origin;
+
+  if (window.location.protocol === 'file:') {
+    const fileBanner = document.getElementById('fileProtocolWarning');
+    if (fileBanner) fileBanner.classList.remove('hidden');
+  }
+
   // =========================================================================
   // 6. Socket.io Client Connection & Event Listeners
   // =========================================================================
   let socket = null;
 
-  try {
+  function initSocket() {
     if (typeof io !== 'undefined') {
-      socket = io({
+      socket = io(SERVER_ORIGIN, {
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
@@ -421,8 +431,19 @@
     } else {
       console.warn('Socket.io client library not loaded. Falling back to HTTP REST API.');
     }
-  } catch (socketInitErr) {
-    console.error('Socket.io initialization error:', socketInitErr);
+  }
+
+  // If page was loaded directly as a local file, inject socket.io script from backend
+  if (typeof io === 'undefined' && window.location.protocol === 'file:') {
+    const socketScript = document.createElement('script');
+    socketScript.src = `${SERVER_ORIGIN}/socket.io/socket.io.js`;
+    socketScript.onload = () => initSocket();
+    socketScript.onerror = () => {
+      console.warn('Could not load remote socket.io script from server. Will use HTTP fallback.');
+    };
+    document.head.appendChild(socketScript);
+  } else {
+    initSocket();
   }
 
   // =========================================================================
@@ -442,7 +463,7 @@
     } else {
       // Graceful fallback to HTTP REST endpoint if WebSocket is offline
       try {
-        const resp = await fetch('/api/predict', {
+        const resp = await fetch(`${SERVER_ORIGIN}/api/predict`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(validData),
@@ -458,7 +479,14 @@
         }
       } catch (err) {
         setLoading(false);
-        showGeneralError(translations[currentLang].err_timeout);
+        const isOffline =
+          !navigator.onLine ||
+          err.message?.includes('Failed to fetch') ||
+          err.name === 'TypeError';
+        const msg = isOffline
+          ? `Cannot connect to server at ${SERVER_ORIGIN}. Please verify backend is running on port 3000.`
+          : translations[currentLang].err_timeout;
+        showGeneralError(msg);
       }
     }
   });

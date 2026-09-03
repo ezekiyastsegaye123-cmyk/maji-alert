@@ -8,7 +8,8 @@
     "dev": "node server.js",
     "ml:start": "./venv/bin/python predict_service.py --serve --port 8000",
     "ml:test": "./venv/bin/pytest tests/test_predict_service.py -v",
-    "test": "jest --runInBand --detectOpenHandles --testTimeout=30000"
+    "test": "jest --runInBand --detectOpenHandles --testTimeout=30000",
+    "test:e2e:human": "node tests/e2e-human-test.js"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "jest": "^30.5.1",
+    "puppeteer": "^25.10.0",
     "socket.io-client": "^4.8.3",
     "supertest": "^7.2.2"
   }
