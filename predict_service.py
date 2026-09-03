@@ -8,6 +8,17 @@ SILSO solar sunspot tables, and SPEI NetCDF spatial grids) are loaded ONCE into
 memory during application startup/lifespan and retained across all subsequent
 predictions.
 
+Memory & Worker Architecture:
+-----------------------------
+Each Uvicorn worker process operates in its own isolated Python virtual memory
+space. The in-memory multi-dimensional SPEI NetCDF spatial grid and tree-ring/solar
+Random Forest model consume approximately 150-250MB RAM per OS process.
+Running multiple Uvicorn workers (--workers N) creates N isolated copies of this
+entire dataset, linearly multiplying physical memory consumption by N.
+In low-resource cellular gateway, edge, or embedded server environments, run Uvicorn
+with a single worker (--workers 1) to conserve host RAM while achieving sub-50ms
+in-memory prediction latencies.
+
 API Contract:
 -------------
 GET /health:
@@ -147,6 +158,7 @@ class PredictionResponse(BaseModel):
     predicted_drought_class: int
     severity_label: str
     confidence_probabilities: Dict[str, float]
+    model_confidence: Optional[float] = None
     grid_cell: GridCellInfo
     year: int
     service_mode: str
@@ -407,16 +419,48 @@ class DroughtPredictionService:
         # Construct vector preserving training feature schema exactly
         x_vec = np.array([[feat_dict[f] for f in DroughtFeatureEngineer.FEATURE_NAMES]])
 
-        # 4. In-memory Model Inference
-        pred_class = int(self._model.predict(x_vec)[0])
+        # 4. In-memory Model Probability Extraction & Strict Validation
         probs = self._model.predict_proba(x_vec)[0]
 
-        prob_map = {}
-        for idx, cls_id in enumerate(self._model.classes_):
-            prob_map[f"class_{int(cls_id)}"] = round(float(probs[idx]), 4)
-        for c in [0, 1, 2]:
-            if f"class_{c}" not in prob_map:
-                prob_map[f"class_{c}"] = 0.0
+        # Validate finite values
+        if not np.all(np.isfinite(probs)):
+            raise PredictionServiceError("Model returned non-finite probabilities.")
+        # Validate [0, 1] range
+        if np.any(probs < 0.0) or np.any(probs > 1.0):
+            raise PredictionServiceError("Model returned probabilities outside the [0, 1] range.")
+
+        # Validate expected classes and dynamic index mapping (do not assume index 2 is Class 2)
+        class_list = [int(c) for c in self._model.classes_]
+        if set(class_list) != {0, 1, 2}:
+            raise PredictionServiceError(f"Unexpected model classes configuration: {class_list}")
+
+        idx_0 = class_list.index(0)
+        idx_1 = class_list.index(1)
+        idx_2 = class_list.index(2)
+
+        p0 = float(probs[idx_0])
+        p1 = float(probs[idx_1])
+        p2 = float(probs[idx_2])
+
+        # 5. Production Decision Rule (Phase 1 Contract)
+        # IF P(Class 2) > 0.60: Class 2
+        # ELSE: argmax over Class 0 and Class 1 (fallback rule, tie-breaker Class 0)
+        if p2 > 0.60:
+            pred_class = 2
+            confidence_val = p2
+        else:
+            if p0 >= p1:
+                pred_class = 0
+                confidence_val = p0
+            else:
+                pred_class = 1
+                confidence_val = p1
+
+        prob_map = {
+            "class_0": round(p0, 4),
+            "class_1": round(p1, 4),
+            "class_2": round(p2, 4),
+        }
 
         severity = SEVERITY_LABELS.get(pred_class, "Unknown")
         service_mode = (
@@ -427,6 +471,7 @@ class DroughtPredictionService:
             "predicted_drought_class": pred_class,
             "severity_label": severity,
             "confidence_probabilities": prob_map,
+            "model_confidence": round(float(confidence_val), 4),
             "grid_cell": grid_info,
             "year": yr,
             "service_mode": service_mode,

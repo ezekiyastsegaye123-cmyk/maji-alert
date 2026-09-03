@@ -43,6 +43,7 @@
       advisory_moderate: 'Moderate water stress forecast. Implement rotational solar pumping schedules and conserve reservoir storage.',
       advisory_severe: 'CRITICAL: Severe drought phase projected. Enforce emergency water rationing for pastoral herds and prioritize human consumption.',
       confidence_breakdown: 'Model Confidence Probabilities',
+      model_confidence: 'Model Confidence:',
       class_normal: 'Normal / Wet',
       class_moderate: 'Moderate Drought',
       class_severe: 'Severe Drought',
@@ -90,6 +91,7 @@
       advisory_moderate: 'Bishaan hir\'achuu danda\'a. Sagantaa dabaree fayyadamaa bishaan qusadhaa.',
       advisory_severe: 'AKEERRA: Hongee cimaan ni dhufa! Bishaan beeyladaaf qusadhaa, dhala namaaf dursa kennaa.',
       confidence_breakdown: 'Hammamtaa Rakkinaa (Probabilities)',
+      model_confidence: 'Amanamummaa Moodeelaa:',
       class_normal: 'Nagaya / Rooba',
       class_moderate: 'Hongee Giddu-galeessa',
       class_severe: 'Hongee Hamaa',
@@ -137,6 +139,7 @@
       advisory_moderate: 'መካከለኛ የውኃ እጥረት ይጠበቃል። የፈረቃ ውኃ አቅርቦት ይተግብሩ እና ክምችት ይቆጥቡ።',
       advisory_severe: 'አስቸኳይ ማስጠንቀቂያ: ከፍተኛ ድርቅ ይጠበቃል! የአስቸኳይ ጊዜ ውኃ ቁጠባ ይተግብሩ እና ቅድሚያ ለሰው ልጅ ይስጡ።',
       confidence_breakdown: 'የሞዴል ትንበያ ዕድሎች',
+      model_confidence: 'የሞዴል እርግጠኝነት:',
       class_normal: 'መደበኛ / እርጥብ',
       class_moderate: 'መካከለኛ ድርቅ',
       class_severe: 'ከባድ ድርቅ',
@@ -187,6 +190,7 @@
     gaugeContainer: document.getElementById('gaugeContainer'),
     gaugeIcon: document.getElementById('gaugeIcon'),
     severityLabel: document.getElementById('severityLabel'),
+    modelConfidenceText: document.getElementById('modelConfidenceText'),
     pumpAdvisory: document.getElementById('pumpAdvisory'),
     probNormalText: document.getElementById('probNormalText'),
     probModerateText: document.getElementById('probModerateText'),
@@ -521,6 +525,17 @@
       el.gaugeIcon.textContent = '🟢';
       el.severityLabel.textContent = translations[currentLang].severity_normal;
       el.pumpAdvisory.textContent = translations[currentLang].advisory_normal;
+    }
+
+    // 2b. Display model confidence percentage for predicted class
+    let rawConf = result.model_confidence;
+    if (typeof rawConf !== 'number') {
+      const clsKey = `class_${cls}`;
+      rawConf = probs && typeof probs[clsKey] === 'number' ? probs[clsKey] : 0;
+    }
+    const confPercent = Math.round(rawConf * 100);
+    if (el.modelConfidenceText) {
+      el.modelConfidenceText.textContent = `${confPercent}%`;
     }
 
     // 3. Confidence probabilities

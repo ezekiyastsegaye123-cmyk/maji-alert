@@ -107,6 +107,8 @@ async function runHumanTest() {
   if (resVisible) {
     const badgeText = await page.$eval('#severityLabel', (el) => el.textContent.trim());
     const advisoryText = await page.$eval('#pumpAdvisory', (el) => el.textContent.trim());
+    const confidenceText = await page.$eval('#modelConfidenceText', (el) => el.textContent.trim());
+    const confidenceLabel = await page.$eval('#confidenceBadge [data-i18n="model_confidence"]', (el) => el.textContent.trim());
     const probNormal = await page.$eval('#probNormalText', (el) => el.textContent.trim());
     const probMod = await page.$eval('#probModerateText', (el) => el.textContent.trim());
     const probSev = await page.$eval('#probSevereText', (el) => el.textContent.trim());
@@ -114,17 +116,42 @@ async function runHumanTest() {
     const latency = await page.$eval('#metaLatency', (el) => el.textContent.trim());
 
     console.log('SUCCESS! Result displayed to human user:');
-    console.log(`   Risk Badge:      ${badgeText}`);
-    console.log(`   Advisory:        ${advisoryText}`);
-    console.log(`   Probabilities:   Normal: ${probNormal}, Moderate: ${probMod}, Severe: ${probSev}`);
-    console.log(`   Grid Cell:       ${gridCell}`);
-    console.log(`   Engine Latency:  ${latency}`);
+    console.log(`   Risk Badge:        ${badgeText}`);
+    console.log(`   Confidence:        ${confidenceLabel} ${confidenceText}`);
+    console.log(`   Advisory:          ${advisoryText}`);
+    console.log(`   Probabilities:     Normal: ${probNormal}, Moderate: ${probMod}, Severe: ${probSev}`);
+    console.log(`   Grid Cell:         ${gridCell}`);
+    console.log(`   Engine Latency:    ${latency}`);
+
+    if (!confidenceText.includes('%')) {
+      throw new Error(`Model confidence "${confidenceText}" does not contain %`);
+    }
+
+    // 8. Test Localization Switching (Oromo & Amharic)
+    console.log('8. Testing language switching to Afaan Oromoo...');
+    await page.evaluate(() => document.querySelector('button[data-lang="om"]').click());
+    const omConfLabel = await page.$eval('#confidenceBadge [data-i18n="model_confidence"]', (el) => el.textContent.trim());
+    console.log(`   Afaan Oromoo confidence label: "${omConfLabel}"`);
+    if (omConfLabel !== 'Amanamummaa Moodeelaa:') {
+      throw new Error(`Expected Oromo confidence label 'Amanamummaa Moodeelaa:', got '${omConfLabel}'`);
+    }
+
+    console.log('9. Testing language switching to Amharic...');
+    await page.evaluate(() => document.querySelector('button[data-lang="am"]').click());
+    const amConfLabel = await page.$eval('#confidenceBadge [data-i18n="model_confidence"]', (el) => el.textContent.trim());
+    console.log(`   Amharic confidence label: "${amConfLabel}"`);
+    if (amConfLabel !== 'የሞዴል እርግጠኝነት:') {
+      throw new Error(`Expected Amharic confidence label 'የሞዴል እርግጠኝነት:', got '${amConfLabel}'`);
+    }
+
+    // Switch back to English
+    await page.evaluate(() => document.querySelector('button[data-lang="en"]').click());
   }
 
   // Save screenshot for audit
   const screenshotPath = path.join(__dirname, '../human-test-screenshot.png');
   await page.screenshot({ path: screenshotPath, fullPage: true });
-  console.log(`8. Saved audit screenshot to ${screenshotPath}`);
+  console.log(`10. Saved audit screenshot to ${screenshotPath}`);
 
   await browser.close();
   console.log('--- Human Browser Automation Test Complete ---');

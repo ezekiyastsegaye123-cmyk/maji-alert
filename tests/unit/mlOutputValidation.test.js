@@ -80,4 +80,10 @@ describe('ML Output Validation', () => {
     delete noYear.year;
     expect(safeValidateMlOutput(noYear).success).toBe(false);
   });
+
+  it('accepts valid model_confidence attribute', () => {
+    const withConf = { ...validOutput, model_confidence: 0.5031 };
+    const parsed = validateMlOutput(withConf);
+    expect(parsed.model_confidence).toBe(0.5031);
+  });
 });
