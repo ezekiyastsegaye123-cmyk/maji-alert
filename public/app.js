@@ -537,7 +537,7 @@
 
       socket.on('drought:prediction_error', (data) => {
         setLoading(false);
-        const errMsg = data && data.message ? data.message : translations[currentLang].err_generic;
+        const errMsg = (data && (data.message || data.error)) || translations[currentLang].err_generic;
         showGeneralError(errMsg);
       });
     } else {
@@ -584,7 +584,8 @@
         setLoading(false);
 
         if (!resp.ok) {
-          showGeneralError(data.error || translations[currentLang].err_generic);
+          const errMsg = (data && (data.error || data.message)) || translations[currentLang].err_generic;
+          showGeneralError(errMsg);
         } else {
           lastPredictionResult = data;
           renderDroughtResult(data);
@@ -812,8 +813,9 @@
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
-          const isEphemeral = data.storage === 'ephemeral';
+        const isSuccess = response.ok && (data.success || data.status === 'success' || data.status === 'accepted_ephemeral');
+        if (isSuccess) {
+          const isEphemeral = data.storage === 'ephemeral' || data.status === 'accepted_ephemeral';
           const msg = isEphemeral
             ? translations[currentLang].fb_success_ephemeral
             : translations[currentLang].fb_success_message;
@@ -827,7 +829,22 @@
           if (el.fbOperator) el.fbOperator.value = '';
           if (el.fbNotes) el.fbNotes.value = '';
         } else {
-          const errDetail = (data && data.error && (data.error.details || data.error.message)) || translations[currentLang].err_generic;
+          let errDetail = translations[currentLang].err_generic;
+          if (data && data.error) {
+            if (typeof data.error === 'string') {
+              errDetail = data.error;
+            } else if (data.error.message) {
+              errDetail = data.error.message;
+            }
+          } else if (data && data.message) {
+            errDetail = data.message;
+          }
+
+          if (data && data.details && Array.isArray(data.details)) {
+            const fieldIssues = data.details.map((d) => (d.message ? `${d.field ? d.field + ': ' : ''}${d.message}` : String(d))).join('; ');
+            if (fieldIssues) errDetail = `${errDetail}: ${fieldIssues}`;
+          }
+
           if (el.fbError) {
             el.fbError.textContent = errDetail;
             el.fbError.classList.remove('hidden');
@@ -835,8 +852,12 @@
         }
       } catch (err) {
         console.error('Feedback submission network error:', err);
+        const isOffline = !navigator.onLine || err.message?.includes('Failed to fetch') || err.name === 'TypeError';
+        const msg = isOffline
+          ? `Cannot connect to server at ${SERVER_ORIGIN}. Please verify network connection.`
+          : translations[currentLang].err_generic;
         if (el.fbError) {
-          el.fbError.textContent = translations[currentLang].err_generic;
+          el.fbError.textContent = msg;
           el.fbError.classList.remove('hidden');
         }
       } finally {

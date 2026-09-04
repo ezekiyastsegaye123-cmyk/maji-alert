@@ -200,6 +200,7 @@ app.post('/api/feedback', async (req, res) => {
         condition: saved.observed_condition,
       });
       return res.status(201).json({
+        success: true,
         status: 'success',
         message: 'Borehole feedback logged successfully',
         feedbackId: saved._id,
@@ -207,7 +208,9 @@ app.post('/api/feedback', async (req, res) => {
     } else {
       logger.warn('MongoDB offline: feedback accepted in ephemeral log mode');
       return res.status(200).json({
+        success: true,
         status: 'accepted_ephemeral',
+        storage: 'ephemeral',
         message: 'Feedback received (database offline; logged to runtime audit)',
         data: feedbackData,
       });
