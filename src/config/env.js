@@ -16,7 +16,7 @@ const envSchema = z.object({
   ML_SERVICE_URL: z.string().url().default('http://127.0.0.1:8000'),
   ML_REQUEST_TIMEOUT_MS: z.coerce.number().int().min(500).max(120000).default(10000),
   PORT: z.coerce.number().int().min(1024).max(65535).default(3000),
-  MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/maji_alert'),
+  MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/frdascr'),
   PYTHON_EXECUTABLE: z.string().default(
     process.env.PYTHON_EXECUTABLE || path.join(__dirname, '../../venv/bin/python')
   ),

@@ -612,7 +612,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Maji Alert Drought Prediction Service",
+    title="FRDASCR Drought Prediction Service",
     description="Persistent in-memory ML inference microservice for drought early warning.",
     version="2.0.0",
     lifespan=lifespan,

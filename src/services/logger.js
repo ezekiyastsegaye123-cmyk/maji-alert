@@ -1,5 +1,5 @@
 /**
- * Structured Logger for Maji Alert
+ * Structured Logger for FRDASCR
  * =================================
  * Provides uniform log output with timestamp, log-level, and metadata.
  */

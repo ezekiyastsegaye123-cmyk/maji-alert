@@ -1,5 +1,5 @@
 /**
- * Maji Alert — Production Express + Socket.io Server
+ * FRDASCR — Production Express + Socket.io Server
  * ==================================================
  * Serving real-time drought notifications for the Borana Zone, Ethiopia.
  */
@@ -105,7 +105,7 @@ app.get('/health', async (req, res) => {
 
   const healthData = {
     status: 'ok',
-    service: 'Maji Alert API',
+    service: 'FRDASCR API',
     uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     components: {
@@ -246,7 +246,7 @@ process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
 if (require.main === module) {
   connectDatabase().then(() => {
     server.listen(config.PORT, () => {
-      logger.info(`Maji Alert server running on port ${config.PORT} [${config.NODE_ENV}]`);
+      logger.info(`FRDASCR server running on port ${config.PORT} [${config.NODE_ENV}]`);
     });
   });
 }

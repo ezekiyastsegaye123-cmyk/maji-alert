@@ -317,7 +317,7 @@ curl -X POST http://localhost:5000/predict -H "Content-Type: application/json" -
   - `Guarded Risk`: Combined risk between $0.20$ and $0.35$.
   - `Low Risk`: Combined risk $< 0.20$.
 
-### 6.1 Testing Locally via Web Application (Maji Alert UI)
+### 6.1 Testing Locally via Web Application (FRDASCR UI)
 
 A full-stack low-bandwidth web application is included to demonstrate the system to operational users, water engineers, and field technicians:
 
@@ -396,7 +396,7 @@ Fradscr/
 │   ├── forecast.py               # Feature engineering, harmonics & forecaster
 │   └── holdout.py                # Geographic holdout evaluator & model exporter
 ├── predict_service.py            # Persistent FastAPI ML prediction service (Python, CLI, HTTP)
-├── server.js                     # Express + Socket.io web server for Maji Alert
+├── server.js                     # Express + Socket.io web server for FRDASCR
 ├── public/                       # Localized low-bandwidth frontend (HTML, CSS, JS)
 ├── Model.ipynb                   # Complete 21-section interactive notebook
 └── tests/                        # 151 passing pytest + 81 passing Jest unit/integration tests

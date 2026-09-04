@@ -1,5 +1,5 @@
 /**
- * Maji Alert — Client-Side Application
+ * FRDASCR — Client-Side Application
  * =====================================
  * Pure vanilla JavaScript. Zero frameworks.
  * Features:
@@ -17,7 +17,7 @@
   // =========================================================================
   const translations = {
     en: {
-      app_title: 'Maji Alert',
+      app_title: 'FRDASCR',
       app_subtitle: 'Borana Zone Solar Pump Drought Warning',
       status_connected: 'Connected to network',
       status_reconnecting: 'Reconnecting to network...',
@@ -55,7 +55,7 @@
       meta_latency: 'Engine Latency:',
       loading_analyzing: 'Analyzing Regional Climate Data...',
       loading_text: 'Analyzing Schwabe solar cycles & tree-ring memory...',
-      footer_text: 'Maji Alert · Humanitarian Teleconnection Forecasting for Borana Zone, Oromia, Ethiopia · Low-Bandwidth Mode',
+      footer_text: 'FRDASCR · Humanitarian Teleconnection Forecasting for Borana Zone, Oromia, Ethiopia · Low-Bandwidth Mode',
       err_geo_denied: 'Location permission was denied. Please enter coordinates manually.',
       err_geo_unavailable: 'GPS location is currently unavailable. Please enter coordinates manually.',
       err_geo_timeout: 'GPS location timed out. Please enter coordinates manually.',
@@ -67,7 +67,7 @@
       err_generic: 'An unexpected error occurred. Please try again.',
     },
     om: {
-      app_title: 'Maji Alert',
+      app_title: 'FRDASCR',
       app_subtitle: 'Akeekkachiisa Hongee Pompii Aduu Godina Booranaa',
       status_connected: 'Netwoorkii waliin walqunnamenteera',
       status_reconnecting: 'Irra deebi\'ee walqunnamaa jira...',
@@ -105,7 +105,7 @@
       meta_latency: 'Yeroo Qorannoo:',
       loading_analyzing: 'Oodeeffannoo Qilleensa Naannoo Xiinxalaa Jira...',
       loading_text: 'Marsaa aduu fi mallattoo mukkeeniin ragaa qindeessaa jira...',
-      footer_text: 'Maji Alert · Tajaajila Raaga Hongee Godina Booranaatiif Hojjetame · Haafeeraa Xiqqaa',
+      footer_text: 'FRDASCR · Tajaajila Raaga Hongee Godina Booranaatiif Hojjetame · Haafeeraa Xiqqaa',
       err_geo_denied: 'Eeyyamni bakkaa hin kennamne. Koordineetii harkaan galchaa.',
       err_geo_unavailable: 'Bakki GPS hin argamne. Koordineetii harkaan galchaa.',
       err_geo_timeout: 'GPS argachuun yeroo fudhateera. Harkaan galchaa.',
@@ -117,7 +117,7 @@
       err_generic: 'Dogoggorri uumameera. Irra deebi\'aa yaalaa.',
     },
     am: {
-      app_title: 'ማጂ አለርት',
+      app_title: 'FRDASCR',
       app_subtitle: 'የቦረና ዞን የፀሐይ ኃይል ውኃ ፓምፕ ድርቅ ቅድመ ማስጠንቀቂያ',
       status_connected: 'ከመረብ ጋር ተገናኝቷል',
       status_reconnecting: 'እንደገና በመገናኘት ላይ...',
@@ -155,7 +155,7 @@
       meta_latency: 'የሞዴሉ የፍጥነት ጊዜ:',
       loading_analyzing: 'የአካባቢ የአየር ንብረት መረጃን በመተንተን ላይ...',
       loading_text: 'የፀሐይ ዑደቶችን እና የዛፍ ቀለበቶችን ታሪክ በመተንተን ላይ...',
-      footer_text: 'ማጂ አለርት · ለቦረና ዞን የድርቅ ቅድመ ማስጠንቀቂያ ሥርዓት · አነስተኛ ባንድዊድዝ',
+      footer_text: 'FRDASCR · ለቦረና ዞን የድርቅ ቅድመ ማስጠንቀቂያ ሥርዓት · አነስተኛ ባንድዊድዝ',
       err_geo_denied: 'የቦታ መረጃ ፈቃድ ተከልክሏል። እባክዎ መጋጠሚያዎችን በእጅ ያስገቡ።',
       err_geo_unavailable: 'የጂፒኤስ መገኛ ማግኘት አልተቻለም። በእጅ ያስገቡ።',
       err_geo_timeout: 'የጂፒኤስ መረጃ ዘግይቷል። እባክዎ በእጅ ያስገቡ።',
