@@ -135,6 +135,162 @@ def process_rwl(
     return result
 
 
+def biweight_robust_mean(
+    values: Union[np.ndarray, Sequence[float]],
+    c: float = 9.0,
+    max_iter: int = 10,
+    tol: float = 1e-4,
+) -> float:
+    """Calculate Tukey's biweight robust mean for an array of observations.
+
+    Parameters
+    ----------
+    values : array-like
+        Numeric array of measurements (e.g. annual RWI across multiple cores).
+    c : float, default 9.0
+        Tuning constant (typically 6.0 to 9.0 in dendrochronology).
+    max_iter : int, default 10
+        Maximum iterations for M-estimator convergence.
+    tol : float, default 1e-4
+        Convergence tolerance on location change.
+
+    Returns
+    -------
+    float
+        The biweight robust mean.
+    """
+    arr = np.asarray(values, dtype=np.float64)
+    arr = arr[np.isfinite(arr)]
+    n = len(arr)
+    if n == 0:
+        return float(np.nan)
+    if n <= 2:
+        return float(np.mean(arr))
+
+    m = float(np.median(arr))
+    for _ in range(max_iter):
+        dev = arr - m
+        mad = float(np.median(np.abs(dev)))
+        if mad < 1e-8:
+            return m
+
+        u = dev / (c * mad)
+        mask = np.abs(u) < 1.0
+        if not np.any(mask):
+            return m
+
+        w = np.zeros(n, dtype=np.float64)
+        w[mask] = (1.0 - u[mask] ** 2) ** 2
+        sum_w = float(np.sum(w))
+        if sum_w < 1e-12:
+            return m
+
+        new_m = float(np.sum(w * arr) / sum_w)
+        if abs(new_m - m) < tol:
+            return new_m
+        m = new_m
+
+    return m
+
+
+def process_multiple_rwl(
+    filepaths: Sequence[Union[str, Path]],
+    *,
+    skip_failed_series: bool = True,
+    exclude_holdout: Sequence[str] = ("eth001", "eth001.rwl"),
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Ingest multiple .rwl files across national sites and compute a unified master chronology.
+
+    Applies negative exponential biological growth detrending to all cores across
+    the provided sites and computes an annual biweight robust mean to form the
+    unified Ethiopian Master Chronology.
+
+    Parameters
+    ----------
+    filepaths : sequence of str or Path
+        List of paths to .rwl files (e.g. eth002.rwl through eth007.rwl).
+    skip_failed_series : bool, default True
+        If True, skip series that fail curve fitting instead of raising.
+    exclude_holdout : sequence of str, default ("eth001", "eth001.rwl")
+        Site identifiers strictly quarantined from the training pipeline.
+
+    Returns
+    -------
+    tuple of (pd.DataFrame, pd.DataFrame)
+        1. all_cores_df: Combined detrended series DataFrame across all sites with columns
+           ['site', 'series_id', 'year', 'raw_ring_width', 'fitted_growth', 'rwi'].
+        2. master_chronology_df: Unified national chronology with columns
+           ['year', 'rwi', 'core_count'].
+
+    Raises
+    ------
+    ValueError
+        If any excluded holdout file (such as eth001) is detected in filepaths.
+    PipelineError
+        If no files or series can be processed successfully.
+    """
+    if not filepaths:
+        raise PipelineError("No .rwl filepaths provided for multi-site processing.")
+
+    # Strict holdout isolation enforcement
+    for p in filepaths:
+        p_str = str(p)
+        p_name = Path(p).name
+        for holdout in exclude_holdout:
+            if holdout in p_str or holdout == p_name:
+                raise ValueError(
+                    f"Quarantined geographic holdout '{holdout}' detected in multi-site training list ({p_str})! "
+                    f"Holdout dataset (eth001) must remain strictly isolated."
+                )
+
+    all_frames: List[pd.DataFrame] = []
+
+    for path_item in filepaths:
+        path_obj = Path(path_item)
+        site_name = path_obj.stem
+        logger.info("Ingesting multi-site RWL: %s (site: %s)", path_obj, site_name)
+        try:
+            df_site = process_rwl(path_obj, skip_failed_series=skip_failed_series)
+            df_site["site"] = site_name
+            # Ensure series IDs are globally unique across sites
+            df_site["series_id"] = site_name + "_" + df_site["series_id"].astype(str)
+            all_frames.append(df_site)
+        except Exception as exc:
+            if skip_failed_series:
+                logger.warning("Failed processing file %s: %s. Skipping.", path_obj, exc)
+                continue
+            raise
+
+    if not all_frames:
+        raise PipelineError("No valid series could be processed across the provided multi-site RWL files.")
+
+    all_cores_df = pd.concat(all_frames, ignore_index=True)
+    all_cores_df = all_cores_df.sort_values(["site", "series_id", "year"]).reset_index(drop=True)
+
+    # Calculate unified annual biweight robust mean
+    chron_records = []
+    for year_val, group in all_cores_df.groupby("year"):
+        rwi_vals = group["rwi"].values
+        bw_val = biweight_robust_mean(rwi_vals)
+        chron_records.append({
+            "year": int(year_val),
+            "rwi": float(bw_val),
+            "core_count": int(len(group)),
+        })
+
+    master_chronology_df = pd.DataFrame(chron_records).sort_values("year").reset_index(drop=True)
+    logger.info(
+        "Built Ethiopian Master Chronology: %d years (%d–%d) from %d series across %d sites.",
+        len(master_chronology_df),
+        master_chronology_df["year"].min(),
+        master_chronology_df["year"].max(),
+        all_cores_df["series_id"].nunique(),
+        all_cores_df["site"].nunique(),
+    )
+
+    return all_cores_df, master_chronology_df
+
+
 def _validate_output(df: pd.DataFrame) -> None:
     """Sanity-check the final output DataFrame.
 

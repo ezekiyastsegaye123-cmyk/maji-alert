@@ -54,6 +54,10 @@ _HEADER_RE = re.compile(
 _DATA_RE = re.compile(
     r"^(\S{1,8})\s+(-?\d+)((?:\s+\S+)+)\s*$",
 )
+# Fixed-width Tucson format where 8-char series ID is immediately followed by a 4-digit decade year
+_DATA_FIXED_RE = re.compile(
+    r"^(\S{1,8}?)(-?\d{4})((?:\s+\S+)+)\s*$",
+)
 
 
 class RWLParseError(Exception):
@@ -130,7 +134,7 @@ def parse_rwl(
                 continue
 
         # --- Parse data line ----------------------------------------------------
-        data_match = _DATA_RE.match(line)
+        data_match = _DATA_RE.match(line) or _DATA_FIXED_RE.match(line)
         if not data_match:
             # Line doesn't match data pattern — skip comment / blank
             logger.debug(

@@ -21,6 +21,7 @@ __pycache__/
 # Large binary datasets (GitHub enforces strict 100 MB file size limit)
 data/*.nc
 copy_of_fradscr.csv
+934366117_*/
 
 # Editor & OS files
 .DS_Store

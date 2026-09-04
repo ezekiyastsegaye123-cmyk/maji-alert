@@ -7,7 +7,7 @@ negative exponential growth models, and Ring Width Index (RWI) calculation.
 from treering.export import export_csv
 from treering.model import fit_growth_curve, negative_exponential
 from treering.parser import parse_rwl
-from treering.pipeline import process_rwl
+from treering.pipeline import biweight_robust_mean, process_multiple_rwl, process_rwl
 from treering.rwi import calculate_rwi
 from treering.solar_lag import (
     DataValidationError,
@@ -62,13 +62,17 @@ from treering.forecast import (
     ModelTrainingError,
     ProjectionError,
     SolarCyclePhaseCalculator,
+    load_isotope_dataset,
     run_drought_forecasting_pipeline,
 )
 from treering.holdout import (
+    calibrated_predict_proba,
     classify_spei_calibrated_3class,
     classify_spei_strict_3class,
     evaluate_geographic_holdout,
+    evaluate_regional_holdout,
     train_and_save_gondar_model,
+    train_and_save_regional_model,
 )
 
 __all__ = [
@@ -76,6 +80,8 @@ __all__ = [
     "negative_exponential",
     "fit_growth_curve",
     "calculate_rwi",
+    "biweight_robust_mean",
+    "process_multiple_rwl",
     "process_rwl",
     "export_csv",
     "load_rwi_data",
@@ -126,9 +132,13 @@ __all__ = [
     "DroughtFeatureEngineer",
     "DroughtForecaster",
     "run_drought_forecasting_pipeline",
+    "load_isotope_dataset",
     "classify_spei_strict_3class",
     "classify_spei_calibrated_3class",
+    "calibrated_predict_proba",
     "train_and_save_gondar_model",
     "evaluate_geographic_holdout",
+    "train_and_save_regional_model",
+    "evaluate_regional_holdout",
 ]
 

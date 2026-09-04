@@ -1,0 +1,192 @@
+# African Tree-Ring 250 Year d13C and Intrinsic Water-Use Efficiency (iWUE)
+#----------------------------------------------------
+#                World Data Service for Paleoclimatology, Boulder
+#                                  and
+#                     NOAA Paleoclimatology Program
+#             National Centers for Environmental Information (NCEI)
+#----------------------------------------------------
+# Template Version 4.0
+# Encoding: UTF-8
+# NOTE: Please cite original publication, NOAA Landing Page URL, dataset and publication DOIs (where available), and date accessed when using downloaded data. If there is no publication information, please cite investigator, study title, NOAA Landing Page URL, and date accessed.
+#
+# Description/Documentation lines begin with #
+# Data lines have no #
+#
+# NOAA_Landing_Page: https://www.ncei.noaa.gov/access/paleo-search/study/20305
+#   Landing_Page_Description: NOAA Landing Page of this file's parent study, which includes all study metadata.
+#
+# Study_Level_JSON_Metadata: https://www.ncei.noaa.gov/pub/data/metadata/published/paleo/json/noaa-tree-20305.json
+#   Study_Level_JSON_Description: JSON metadata of this data file's parent study, which includes all study metadata.
+#
+# Data_Type: Tree Ring
+#
+# Dataset_DOI: 10.25921/pwzb-3a76
+#
+# Science_Keywords: 
+#--------------------
+# Resource_Links
+#
+# Data_Download_Resource:  https://www.ncei.noaa.gov/pub/data/paleo/treering/isotope/africa/africa2016d13c-iwue-kv-noaa.txt
+#   Data_Download_Description: NOAA Template File; Koichab Valley Tree-Ring d13C and Intrinsic Water-Use Efficiency (iWUE)
+#
+#--------------------
+# Contribution_Date
+#   Date: 2016-07-05
+#--------------------
+# File_Last_Modified_Date
+#   Date: 2025-09-26
+#--------------------
+# Title
+#   Study_Name: African Tree-Ring 250 Year d13C and Intrinsic Water-Use Efficiency (iWUE)
+#--------------------
+# Investigators
+#   Investigators: Wils, T.H.G.(https://orcid.org/0000-0002-5794-0824); Robertson, I.(https://orcid.org/0000-0001-7174-4523); Woodborne, S.; Hall, G.; Koprowski, M.(https://orcid.org/0000-0002-0583-4165); Eshetu, Z.
+#--------------------
+# Description_Notes_and_Keywords
+#   Description: Annual carbon isotope and intrinsic water-use efficiency values from 8 trees from Ethiopia, Namibia, and South Africa# IITRDB15
+#--------------------
+# Publication
+#   Authors: Tommy H.G. Wils, Iain Robertson, Stephan Woodborne, Grant Hall, Marcin Koprowski, Zewdu Eshetu
+#   Journal_Name: Journal of Quaternary Science
+#   Published_Title: Anthropogenic forcing increases the water use efficiency of African trees
+#   Published_Date_or_Year: 2016
+#   Volume: 31
+#   Issue: 4
+#   Pages: 386-390
+#   Report_Number: 
+#   DOI: 10.1002/jqs.2865
+#   Full_Citation:
+#   Abstract: Rising atmospheric CO2 concentrations affect climate directly through radiative effects and indirectly by changing plant water-use efficiency. Under global warming scenarios these widely reported changes will have a substantial impact on future bush encroachment, crop yields, river flow and climate feedbacks. Tree-ring intrinsic water-use efficiency (iWUE) records for Africa show a 24.6% increase over the 20th century. As high iWUE can partly counterbalance projected decreases in regional precipitation, this research has important implications for those involved in water resource management and highlights the need for climate models to take physiological forcing into account.
+#--------------------
+# Funding_Agency
+#   Funding_Agency_Name: National Geographic Society
+#   Grant: GEFNE80-13
+#--------------------
+# Site_Information
+#   Site_Name: Koichab Valley
+#   Location: Namibia
+#   Northernmost_Latitude: -26.22
+#   Southernmost_Latitude: -26.22
+#   Easternmost_Longitude: 15.87
+#   Westernmost_Longitude: 15.87
+#   Elevation_m: 
+#--------------------
+# Data_Collection
+#   Collection_Name: Africad13CiWUE-kv
+#   First_Year: 1905
+#   Last_Year: 1987
+#   Time_Unit: CE
+#   Core_Length_m:
+#   Parameter_Keywords: carbon isotopes
+#   Notes: 
+#--------------------
+# Species
+# Tree_Species_Download_Resource:  https://www.ncei.noaa.gov/pub/data/paleo/templates/tree-species-code.csv
+#   Tree_Species_Download_Description:  List of accepted tree species names and codes. 
+#
+#   Species_Name: Acacia erioloba E. Mey
+#   Common_Name: camel thorn
+#   Tree_Species_Code: ACER
+#--------------------
+# Chronology_Information
+# Chronology:
+#--------------------
+# Variables
+# PaST_Thesaurus_Download_Resource: https://www.ncei.noaa.gov/access/paleo-search/skos/past-thesaurus.rdf
+#   PaST_Thesaurus_Download_Description: Paleoenvironmental Standard Terms (PaST) Thesaurus terms, definitions, and relationships in SKOS format.
+#
+# Data variables follow that are preceded by '##' in columns one and two.
+# Variables list, one per line, shortname-tab-var components: what, material, error, units, seasonality, data type, detail, method, C or N for Character or Numeric data)
+#
+## age_CE	age,,,year Common Era,,climate reconstructions;tree ring,,,N,
+## d13CKV	delta 13C,alpha cellulose,,per mil VPDB,,tree ring,,isotope ratio mass spectrometry,N,Koichab Valley
+## iWUEKV	intrinsic water use efficiency,,95% confidence interval upper bound,micromole per mole,,climate reconstructions;tree ring,,,N,Koichab Valley
+#--------------------
+# Data:
+# Data lines follow (have no #)
+# Data line format - tab-delimited text, variable short name as header
+# Missing_Values:
+age_CE	d13CKV	iWUEKV
+1905	-22.70	90.4
+1906	-23.40	84.7
+1907	-23.03	87.9
+1908	-21.70	99.1
+1909	-21.17	103.6
+1910	-21.86	98.1
+1911	-21.57	100.6
+1912	-22.51	92.9
+1913	-22.59	92.4
+1914	-22.75	91.2
+1915	-22.74	91.4
+1916	-22.69	91.9
+1917	-22.41	94.4
+1918	-22.14	96.8
+1919	-22.05	97.7
+1920	-22.29	95.8
+1921	-22.59	93.5
+1922	-22.44	94.8
+1923	-22.36	95.7
+1924	-22.02	98.7
+1925	-21.52	103.0
+1926	-22.18	97.6
+1927	-22.30	96.7
+1928	-21.83	100.8
+1929	-21.02	107.7
+1930	-21.32	105.4
+1931	-20.94	108.7
+1932	-22.03	99.6
+1933	-20.60	111.8
+1934	-21.17	107.1
+1935	-21.61	103.5
+1936	-23.05	91.4
+1937	-21.04	108.7
+1938	-20.76	111.2
+1939	-20.76	111.4
+1940	-20.63	112.6
+1941	-21.64	104.1
+1942	-23.10	91.7
+1943	-22.18	99.6
+1944	-20.95	110.4
+1945	-22.39	98.1
+1946	-21.32	107.5
+1947	-21.20	108.7
+1948	-22.93	94.0
+1949	-22.10	101.3
+1950	-21.86	103.6
+1951	-22.48	98.4
+1952	-22.22	100.8
+1953	-22.92	94.9
+1954	-21.36	108.6
+1955	-21.91	104.1
+1956	-21.65	106.5
+1957	-22.04	103.4
+1958	-21.16	111.3
+1959	-21.61	107.6
+1960	-21.49	108.9
+1961	-24.18	85.5
+1962	-23.52	91.7
+1963	-22.55	100.8
+1964	-21.41	111.5
+1965	-21.72	109.3
+1966	-20.99	116.3
+1967	-21.94	108.4
+1968	-22.51	103.8
+1969	-22.73	102.4
+1970	-22.54	104.8
+1971	-22.01	110.1
+1972	-24.28	90.1
+1973	-25.28	81.5
+1974	-23.28	100.4
+1975	-24.49	89.9
+1976	-23.75	97.3
+1977	-24.12	94.4
+1978	-23.77	98.3
+1979	-24.74	89.9
+1980	-24.78	90.2
+1981	-23.99	98.2
+1982	-22.02	117.4
+1983	-22.61	112.6
+1984	-24.49	95.5
+1985	-25.01	91.2
+1986	-24.45	97.2
+1987	-23.91	103.0

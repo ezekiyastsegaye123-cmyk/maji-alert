@@ -44,9 +44,11 @@
     "rwi_diff1",
     "rwi_smooth5",
     "nino34_mean",
-    "dmi_mean"
+    "dmi_mean",
+    "d13c",
+    "iwue"
   ],
-  "feature_count": 18,
+  "feature_count": 20,
   "hyperparameters": {
     "n_estimators": 350,
     "max_depth": 7,
@@ -55,23 +57,25 @@
     "random_state": 42
   },
   "feature_importances": {
-    "sunspot": 0.06830762988569943,
-    "sunspot_lag1": 0.0485920430923564,
-    "sunspot_lag2": 0.07479925140049293,
-    "sunspot_lag3": 0.055408221173036114,
-    "sunspot_lag4": 0.05460357503221578,
-    "sunspot_lag5": 0.05072686007021161,
-    "sunspot_smooth11": 0.10917911995660741,
-    "sunspot_diff1": 0.04413182483616582,
-    "sunspot_diff3": 0.041255281487707414,
-    "solar_phase": 0.030081980198783158,
-    "solar_phase_sin": 0.032975314277113886,
-    "solar_phase_cos": 0.03966197561192049,
-    "rwi": 0.043917636341583424,
-    "rwi_lag1": 0.04936565342204294,
-    "rwi_diff1": 0.06545730824483575,
-    "rwi_smooth5": 0.06476475216926464,
-    "nino34_mean": 0.06428803249355936,
-    "dmi_mean": 0.06248354030640356
+    "sunspot": 0.0665935294213101,
+    "sunspot_lag1": 0.049700480302461277,
+    "sunspot_lag2": 0.07038087100512497,
+    "sunspot_lag3": 0.053338783330839405,
+    "sunspot_lag4": 0.05141017951314528,
+    "sunspot_lag5": 0.05542289816340364,
+    "sunspot_smooth11": 0.10421460924539794,
+    "sunspot_diff1": 0.0466881342193698,
+    "sunspot_diff3": 0.042391196356916246,
+    "solar_phase": 0.031218029315878863,
+    "solar_phase_sin": 0.035498587144115905,
+    "solar_phase_cos": 0.045271043836736136,
+    "rwi": 0.050804253102008354,
+    "rwi_lag1": 0.051205318632520584,
+    "rwi_diff1": 0.06408962762088073,
+    "rwi_smooth5": 0.06551458513243845,
+    "nino34_mean": 0.06586330444852911,
+    "dmi_mean": 0.0503945692089233,
+    "d13c": 0.0,
+    "iwue": 0.0
   }
 }

@@ -103,10 +103,13 @@ logging.basicConfig(
 logger = logging.getLogger("predict_service")
 
 # Default resource paths
-DEFAULT_MODEL_PATH = Path("models/random_forest_eth007.joblib")
+DEFAULT_REGIONAL_MODEL_PATH = Path("models/random_forest_regional.joblib")
+DEFAULT_ETH007_MODEL_PATH = Path("models/random_forest_eth007.joblib")
+DEFAULT_MODEL_PATH = DEFAULT_REGIONAL_MODEL_PATH if DEFAULT_REGIONAL_MODEL_PATH.exists() else DEFAULT_ETH007_MODEL_PATH
 DEFAULT_SUNSPOT_PATH = Path("SN_y_tot_V2.0.csv")
 DEFAULT_NETCDF_PATH = Path("data/spei01.nc")
 DEFAULT_OCEAN_PATH = Path("data/ocean_indices_annual.csv")
+DEFAULT_ISOTOPE_PATH = Path("data/isotope/africa2016d13c-iwue-k-noaa.txt")
 
 SEVERITY_LABELS: Dict[int, str] = {
     0: "Normal",
@@ -144,6 +147,8 @@ class PredictionRequest(BaseModel):
     latitude: float = Field(..., ge=-90.0, le=90.0, description="Latitude in decimal degrees [-90, 90]")
     longitude: float = Field(..., ge=-180.0, le=180.0, description="Longitude in decimal degrees [-180, 180]")
     year: int = Field(..., ge=1700, le=2100, description="Evaluation year [1700, 2100]")
+    d13c: Optional[float] = Field(None, description="Optional stable carbon isotope ratio (d13C permil)")
+    iwue: Optional[float] = Field(None, description="Optional intrinsic water-use efficiency (iWUE umol/mol)")
 
 
 class GridCellInfo(BaseModel):
@@ -189,15 +194,18 @@ class DroughtPredictionService:
         sunspot_path: Union[str, Path] = DEFAULT_SUNSPOT_PATH,
         netcdf_path: Union[str, Path] = DEFAULT_NETCDF_PATH,
         ocean_path: Union[str, Path] = DEFAULT_OCEAN_PATH,
+        isotope_path: Union[str, Path] = DEFAULT_ISOTOPE_PATH,
     ):
         self.model_path = Path(model_path)
         self.sunspot_path = Path(sunspot_path)
         self.netcdf_path = Path(netcdf_path)
         self.ocean_path = Path(ocean_path)
+        self.isotope_path = Path(isotope_path)
 
         self._model: Optional[RandomForestClassifier] = None
         self._df_solar: Optional[pd.DataFrame] = None
         self._df_ocean: Optional[pd.DataFrame] = None
+        self._df_isotope: Optional[pd.DataFrame] = None
         self._spei_ds: Optional[xr.Dataset] = None
         self._spei_lats: Optional[np.ndarray] = None
         self._spei_lons: Optional[np.ndarray] = None
@@ -208,13 +216,19 @@ class DroughtPredictionService:
     @classmethod
     def get_instance(
         cls,
-        model_path: Union[str, Path] = DEFAULT_MODEL_PATH,
+        model_path: Optional[Union[str, Path]] = None,
         sunspot_path: Union[str, Path] = DEFAULT_SUNSPOT_PATH,
         netcdf_path: Union[str, Path] = DEFAULT_NETCDF_PATH,
         ocean_path: Union[str, Path] = DEFAULT_OCEAN_PATH,
+        isotope_path: Union[str, Path] = DEFAULT_ISOTOPE_PATH,
     ) -> DroughtPredictionService:
+        target_model = (
+            Path(model_path)
+            if model_path is not None
+            else (DEFAULT_REGIONAL_MODEL_PATH if DEFAULT_REGIONAL_MODEL_PATH.exists() else DEFAULT_ETH007_MODEL_PATH)
+        )
         if cls._instance is None:
-            cls._instance = cls(model_path, sunspot_path, netcdf_path, ocean_path)
+            cls._instance = cls(target_model, sunspot_path, netcdf_path, ocean_path, isotope_path)
             cls._instance.initialize()
         return cls._instance
 
@@ -228,21 +242,26 @@ class DroughtPredictionService:
         logger.info("Initializing persistent ML prediction engine...")
 
         # 1. Load Joblib Random Forest Model
+        if not self.model_path.exists() and DEFAULT_REGIONAL_MODEL_PATH.exists():
+            self.model_path = DEFAULT_REGIONAL_MODEL_PATH
+
         logger.info("Loading Joblib model from: %s", self.model_path)
         if not self.model_path.exists():
-            from treering.holdout import train_and_save_gondar_model
-            logger.warning("Model file not found at %s. Triggering on-demand training...", self.model_path)
-            train_and_save_gondar_model(
+            from treering.holdout import train_and_save_regional_model
+            logger.warning("Model file not found at %s. Triggering on-demand regional training...", self.model_path)
+            train_and_save_regional_model(
                 model_output_path=self.model_path,
                 sunspot_path=self.sunspot_path,
                 netcdf_path=self.netcdf_path,
+                ocean_csv_path=self.ocean_path,
+                isotope_path=self.isotope_path,
             )
 
         try:
             self._model = joblib.load(self.model_path)
             if not hasattr(self._model, "predict"):
                 raise ModelNotFoundError(f"Object loaded from {self.model_path} is not a valid estimator.")
-            logger.info("Successfully loaded Random Forest model (classes=%s)", list(self._model.classes_))
+            logger.info("Successfully loaded Random Forest model (classes=%s, features=%d)", list(self._model.classes_), getattr(self._model, "n_features_in_", -1))
         except Exception as exc:
             logger.error("Failed to load model from %s: %s", self.model_path, exc)
             raise ModelNotFoundError(f"Cannot load model from {self.model_path}: {exc}") from exc
@@ -324,6 +343,25 @@ class DroughtPredictionService:
             logger.warning("Ocean indices dataset not found at %s. Using neutral anomaly fallback.", self.ocean_path)
             self._df_ocean = None
 
+        # 5. Load Isotope Dataset (d13C & iWUE)
+        logger.info("Loading Isotope dataset from: %s", self.isotope_path)
+        if self.isotope_path.exists():
+            try:
+                from treering.forecast import load_isotope_dataset
+                self._df_isotope = load_isotope_dataset(self.isotope_path)
+                logger.info(
+                    "Successfully loaded isotope records (%d records: %d to %d)",
+                    len(self._df_isotope),
+                    int(self._df_isotope["year"].min()),
+                    int(self._df_isotope["year"].max()),
+                )
+            except Exception as exc:
+                logger.warning("Failed to load isotope dataset: %s. Using climatological fallbacks.", exc)
+                self._df_isotope = None
+        else:
+            logger.warning("Isotope dataset not found at %s. Using climatological fallbacks.", self.isotope_path)
+            self._df_isotope = None
+
         self._initialized = True
         duration = time.time() - start_time
         logger.info("ML prediction engine fully initialized in %.3f seconds. Ready for inference.", duration)
@@ -346,6 +384,8 @@ class DroughtPredictionService:
         latitude: float,
         longitude: float,
         year: int,
+        d13c: Optional[float] = None,
+        iwue: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Execute high-speed in-memory prediction without reloading heavy resources."""
         if not self.is_ready:
@@ -438,6 +478,23 @@ class DroughtPredictionService:
                 nino_val = float(oc_rows.iloc[0].get("nino34_mean", 0.0))
                 dmi_val = float(oc_rows.iloc[0].get("dmi_mean", 0.0))
 
+        # 3c. Extract or Impute Isotopic Teleconnections (d13C / iWUE)
+        d13c_val = -20.5
+        iwue_val = 130.0
+        if d13c is not None:
+            d13c_val = float(d13c)
+        elif self._df_isotope is not None:
+            iso_rows = self._df_isotope[self._df_isotope["year"] == yr]
+            if len(iso_rows) > 0:
+                d13c_val = float(iso_rows.iloc[0]["d13c"])
+
+        if iwue is not None:
+            iwue_val = float(iwue)
+        elif self._df_isotope is not None:
+            iso_rows = self._df_isotope[self._df_isotope["year"] == yr]
+            if len(iso_rows) > 0:
+                iwue_val = float(iso_rows.iloc[0]["iwue"])
+
         feat_dict = {
             "sunspot": float(sun_row["sunspot"]),
             "sunspot_lag1": float(sun_row["sunspot_lag1"]),
@@ -457,10 +514,19 @@ class DroughtPredictionService:
             "rwi_smooth5": rwi_smooth5_val,
             "nino34_mean": nino_val,
             "dmi_mean": dmi_val,
+            "d13c": d13c_val,
+            "iwue": iwue_val,
         }
 
+        # Select matching feature schema based on loaded model dimensions
+        model_n_features = getattr(self._model, "n_features_in_", len(DroughtFeatureEngineer.FEATURE_NAMES))
+        if model_n_features == len(DroughtFeatureEngineer.LEGACY_18_FEATURE_NAMES):
+            feature_cols = DroughtFeatureEngineer.LEGACY_18_FEATURE_NAMES
+        else:
+            feature_cols = DroughtFeatureEngineer.FEATURE_NAMES
+
         # Construct vector preserving training feature schema exactly
-        x_vec = np.array([[feat_dict[f] for f in DroughtFeatureEngineer.FEATURE_NAMES]])
+        x_vec = np.array([[feat_dict[f] for f in feature_cols]])
 
         # 4. In-memory Model Probability Extraction & Strict Validation
         probs = self._model.predict_proba(x_vec)[0]
@@ -572,10 +638,16 @@ class DroughtPredictionService:
 # Standalone Functional Entrypoint (Backward Compatibility)
 # =============================================================================
 
-def predict_drought(latitude: float, longitude: float, year: int) -> Dict[str, Any]:
+def predict_drought(
+    latitude: float,
+    longitude: float,
+    year: int,
+    d13c: Optional[float] = None,
+    iwue: Optional[float] = None,
+) -> Dict[str, Any]:
     """Functional interface for direct Python imports."""
     service = DroughtPredictionService.get_instance()
-    return service.predict(latitude=latitude, longitude=longitude, year=year)
+    return service.predict(latitude=latitude, longitude=longitude, year=year, d13c=d13c, iwue=iwue)
 
 
 # =============================================================================
@@ -586,10 +658,13 @@ def predict_drought(latitude: float, longitude: float, year: int) -> Dict[str, A
 async def lifespan(app: FastAPI):
     """Lifespan manager: Loads models once per worker during startup."""
     logger.info("Entering FastAPI application lifespan startup...")
+    model_path = DEFAULT_REGIONAL_MODEL_PATH if DEFAULT_REGIONAL_MODEL_PATH.exists() else DEFAULT_ETH007_MODEL_PATH
     service = DroughtPredictionService(
-        model_path=DEFAULT_MODEL_PATH,
+        model_path=model_path,
         sunspot_path=DEFAULT_SUNSPOT_PATH,
         netcdf_path=DEFAULT_NETCDF_PATH,
+        ocean_path=DEFAULT_OCEAN_PATH,
+        isotope_path=DEFAULT_ISOTOPE_PATH,
     )
     try:
         service.initialize()
@@ -676,6 +751,7 @@ async def readiness_check(request: Request):
             "solar_data_loaded": service._df_solar is not None,
             "spei_data_loaded": service._spei_lats is not None,
             "ocean_data_loaded": service._df_ocean is not None,
+            "isotope_data_loaded": service._df_isotope is not None,
         }
 
     startup_err = getattr(request.app.state, "startup_error", "Service is still initializing.")
@@ -688,6 +764,7 @@ async def readiness_check(request: Request):
             "solar_data_loaded": False,
             "spei_data_loaded": False,
             "ocean_data_loaded": False,
+            "isotope_data_loaded": False,
         },
     )
 
@@ -702,6 +779,8 @@ async def predict_get(
     latitude: float = Query(..., ge=-90.0, le=90.0, description="Latitude in decimal degrees"),
     longitude: float = Query(..., ge=-180.0, le=180.0, description="Longitude in decimal degrees"),
     year: int = Query(..., ge=1700, le=2100, description="Evaluation year"),
+    d13c: Optional[float] = Query(None, description="Optional d13C isotope proxy (permil)"),
+    iwue: Optional[float] = Query(None, description="Optional iWUE isotope proxy (umol/mol)"),
 ):
     """Execute high-speed in-memory prediction via GET query parameters."""
     service: Optional[DroughtPredictionService] = getattr(request.app.state, "service", None)
@@ -710,7 +789,7 @@ async def predict_get(
         service = DroughtPredictionService.get_instance()
 
     try:
-        return service.predict(latitude=latitude, longitude=longitude, year=year)
+        return service.predict(latitude=latitude, longitude=longitude, year=year, d13c=d13c, iwue=iwue)
     except InvalidInputError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except Exception as exc:
@@ -737,6 +816,8 @@ async def predict_post(request: Request, payload: PredictionRequest):
             latitude=payload.latitude,
             longitude=payload.longitude,
             year=payload.year,
+            d13c=payload.d13c,
+            iwue=payload.iwue,
         )
     except InvalidInputError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

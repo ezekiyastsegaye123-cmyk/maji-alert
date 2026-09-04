@@ -29,6 +29,7 @@ Architecture:
 
 from __future__ import annotations
 
+import io
 import json
 import logging
 from dataclasses import asdict, dataclass, field
@@ -181,12 +182,59 @@ class SolarCyclePhaseCalculator:
 
 
 # =====================================================================
-# Feature Engineering
+# =====================================================================
+# Feature Engineering & Isotopic Ingestion
 # =====================================================================
 
 
+def load_isotope_dataset(
+    filepath: Union[str, Path] = "data/isotope/africa2016d13c-iwue-k-noaa.txt",
+) -> pd.DataFrame:
+    """Load and parse the 250-year African Tree-Ring d13C and iWUE dataset.
+
+    Parameters
+    ----------
+    filepath : str or Path
+        Path to the NOAA-formatted isotope text file.
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned DataFrame with columns ['year', 'd13c', 'iwue'].
+    """
+    p = Path(filepath)
+    if not p.exists():
+        alt = Path("934366117_2026-09-04/data/pub/data/paleo/treering/isotope/africa/africa2016d13c-iwue-k-noaa.txt")
+        if alt.exists():
+            p = alt
+        else:
+            raise FileNotFoundError(f"Isotope dataset file not found at {p} or {alt}")
+
+    with open(p, "r", encoding="utf-8", errors="replace") as f:
+        data_lines = [line for line in f if not line.startswith("#")]
+
+    df = pd.read_csv(io.StringIO("".join(data_lines)), sep=r"\t+", engine="python")
+    year_col = "age_CE" if "age_CE" in df.columns else "year"
+
+    # Match d13C mean and iWUE mean columns
+    d13c_col = "d13CKmn" if "d13CKmn" in df.columns else [c for c in df.columns if "13" in c and "mn" in c.lower()][0]
+    iwue_col = "iWUEKmn" if "iWUEKmn" in df.columns else [c for c in df.columns if "wue" in c.lower() and "mn" in c.lower()][0]
+
+    clean_df = df[[year_col, d13c_col, iwue_col]].copy()
+    clean_df.columns = ["year", "d13c", "iwue"]
+    clean_df["year"] = clean_df["year"].astype(int)
+    clean_df["d13c"] = clean_df["d13c"].astype(float)
+    clean_df["iwue"] = clean_df["iwue"].astype(float)
+
+    # Safe historical NaN handling via chronological backfill and forward fill
+    clean_df["d13c"] = clean_df["d13c"].bfill().ffill()
+    clean_df["iwue"] = clean_df["iwue"].bfill().ffill()
+
+    return clean_df.sort_values("year").reset_index(drop=True)
+
+
 class DroughtFeatureEngineer:
-    """Engineers causal predictors from Sunspot, Tree-Ring (RWI), Ocean Indices (ENSO/IOD), and SPEI records."""
+    """Engineers causal predictors from Sunspot, Tree-Ring (RWI), Ocean Indices (ENSO/IOD), Isotopic (d13C/iWUE), and SPEI records."""
 
     BASE_FEATURE_NAMES: List[str] = [
         "sunspot",
@@ -212,7 +260,14 @@ class DroughtFeatureEngineer:
         "dmi_mean",
     ]
 
-    FEATURE_NAMES: List[str] = BASE_FEATURE_NAMES + OCEAN_FEATURE_NAMES
+    ISOTOPE_FEATURE_NAMES: List[str] = [
+        "d13c",
+        "iwue",
+    ]
+
+    FEATURE_NAMES: List[str] = BASE_FEATURE_NAMES + OCEAN_FEATURE_NAMES + ISOTOPE_FEATURE_NAMES
+    REGIONAL_FEATURE_NAMES: List[str] = BASE_FEATURE_NAMES + OCEAN_FEATURE_NAMES + ISOTOPE_FEATURE_NAMES
+    LEGACY_18_FEATURE_NAMES: List[str] = BASE_FEATURE_NAMES + OCEAN_FEATURE_NAMES
 
     def __init__(
         self,
@@ -283,9 +338,10 @@ class DroughtFeatureEngineer:
         df_solar: pd.DataFrame,
         df_spei: pd.DataFrame,
         df_ocean: Optional[pd.DataFrame] = None,
+        df_isotope: Optional[pd.DataFrame] = None,
     ) -> pd.DataFrame:
         """
-        Merge chronology, solar features, SPEI ground-truth, and ocean indices into aligned training set.
+        Merge chronology, solar features, SPEI ground-truth, ocean indices, and isotopic records into aligned training set.
         """
         if "year" not in df_spei.columns or "spei" not in df_spei.columns:
             raise FeatureEngineeringError("SPEI DataFrame must contain 'year' and 'spei' columns.")
@@ -308,6 +364,18 @@ class DroughtFeatureEngineer:
                 merged[f] = 0.0
             else:
                 merged[f] = merged[f].fillna(0.0)
+
+        # Merge isotopic features (d13C & iWUE) if provided
+        if df_isotope is not None:
+            merged = pd.merge(merged, df_isotope, on="year", how="left")
+
+        # Handle isotopic features with safe backfill and forward fill (no zero-filling)
+        default_isotope_fallbacks = {"d13c": -21.49, "iwue": 102.36}
+        for f in self.ISOTOPE_FEATURE_NAMES:
+            if f not in merged.columns:
+                merged[f] = default_isotope_fallbacks[f]
+            else:
+                merged[f] = merged[f].bfill().ffill().fillna(default_isotope_fallbacks[f])
 
         if len(merged) < 20:
             raise FeatureEngineeringError(f"Insufficient merged training samples: {len(merged)} rows found.")
@@ -537,6 +605,8 @@ class DroughtForecaster:
                 "rwi_smooth5": rwi_smooth5,
                 "nino34_mean": 0.0,
                 "dmi_mean": 0.0,
+                "d13c": -20.5,
+                "iwue": 130.0,
             }
 
             x_vec = np.array([[feat_dict[f] for f in DroughtFeatureEngineer.FEATURE_NAMES]])

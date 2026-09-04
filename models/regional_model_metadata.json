@@ -1,0 +1,85 @@
+{
+  "model_name": "Random Forest Regional RCS Model",
+  "model_type": "RandomForestClassifier",
+  "training_sites": [
+    "eth002",
+    "eth003",
+    "eth004",
+    "eth005",
+    "eth006",
+    "eth007"
+  ],
+  "training_chronology": "Ethiopian Master Chronology (RCS Biweight Robust Mean)",
+  "training_coordinates": {
+    "latitude": 13.01,
+    "longitude": 37.8
+  },
+  "training_period": [
+    1901,
+    2014
+  ],
+  "n_samples": 114,
+  "class_distribution": {
+    "0": 70,
+    "1": 28,
+    "2": 16
+  },
+  "classes_": [
+    0,
+    1,
+    2
+  ],
+  "feature_names": [
+    "sunspot",
+    "sunspot_lag1",
+    "sunspot_lag2",
+    "sunspot_lag3",
+    "sunspot_lag4",
+    "sunspot_lag5",
+    "sunspot_smooth11",
+    "sunspot_diff1",
+    "sunspot_diff3",
+    "solar_phase",
+    "solar_phase_sin",
+    "solar_phase_cos",
+    "rwi",
+    "rwi_lag1",
+    "rwi_diff1",
+    "rwi_smooth5",
+    "nino34_mean",
+    "dmi_mean",
+    "d13c",
+    "iwue"
+  ],
+  "feature_count": 20,
+  "hyperparameters": {
+    "n_estimators": 350,
+    "max_depth": 7,
+    "max_features": "log2",
+    "class_weight": "balanced_subsample",
+    "random_state": 42,
+    "calibration_temperature": 0.35
+  },
+  "feature_importances": {
+    "sunspot": 0.041495031603937665,
+    "sunspot_lag1": 0.054122447542235504,
+    "sunspot_lag2": 0.0507873351846797,
+    "sunspot_lag3": 0.03791656861542691,
+    "sunspot_lag4": 0.04786696531043519,
+    "sunspot_lag5": 0.0613035799943085,
+    "sunspot_smooth11": 0.0663337980603883,
+    "sunspot_diff1": 0.05142727470237035,
+    "sunspot_diff3": 0.04158351897064141,
+    "solar_phase": 0.03015414566590472,
+    "solar_phase_sin": 0.027593223381457765,
+    "solar_phase_cos": 0.04219201101770402,
+    "rwi": 0.05572640842510868,
+    "rwi_lag1": 0.06633076653044258,
+    "rwi_diff1": 0.056233302318455615,
+    "rwi_smooth5": 0.059495708756725614,
+    "nino34_mean": 0.05421342366723262,
+    "dmi_mean": 0.05151778953362226,
+    "d13c": 0.05306368675529098,
+    "iwue": 0.05064301396363163
+  }
+}

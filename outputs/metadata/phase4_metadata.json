@@ -34,46 +34,46 @@
       "1": 26,
       "2": 15
     },
-    "accuracy": 0.6509433962264151,
-    "operational_accuracy": 0.8679245283018868,
-    "severe_drought_detection_accuracy": 0.8679245283018868,
-    "normal_year_accuracy": 0.8923076923076924,
-    "extreme_deficit_accuracy": 0.8962264150943396,
+    "accuracy": 0.660377358490566,
+    "operational_accuracy": 0.8584905660377359,
+    "severe_drought_detection_accuracy": 0.8584905660377359,
+    "normal_year_accuracy": 0.9076923076923077,
+    "extreme_deficit_accuracy": 0.8867924528301887,
     "strict_climatological_accuracy": 1.0,
-    "high_confidence_subset_accuracy": 0.6190476190476191,
-    "balanced_accuracy": 0.46666666666666673,
-    "macro_f1": 0.4861519409896086,
-    "weighted_f1": 0.6092463801684126,
+    "high_confidence_subset_accuracy": 0.5945945945945946,
+    "balanced_accuracy": 0.47179487179487184,
+    "macro_f1": 0.4890570797855565,
+    "weighted_f1": 0.6177397761553703,
     "class_metrics": {
       "class_0_normal": {
-        "precision": 0.6744186046511628,
-        "recall": 0.8923076923076924,
-        "f1": 0.7682119205298014,
+        "precision": 0.686046511627907,
+        "recall": 0.9076923076923077,
+        "f1": 0.7814569536423841,
         "support": 65
       },
       "class_1_moderate": {
-        "precision": 0.5333333333333333,
+        "precision": 0.5714285714285714,
         "recall": 0.3076923076923077,
-        "f1": 0.3902439024390244,
+        "f1": 0.4,
         "support": 26
       },
       "class_2_severe": {
-        "precision": 0.6,
+        "precision": 0.5,
         "recall": 0.2,
-        "f1": 0.3,
+        "f1": 0.2857142857142857,
         "support": 15
       }
     },
     "confusion_matrix": [
       [
-        58,
-        6,
+        59,
+        5,
         1
       ],
       [
-        17,
+        16,
         8,
-        1
+        2
       ],
       [
         11,

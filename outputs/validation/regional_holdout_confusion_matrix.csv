@@ -1,0 +1,4 @@
+,Predicted_Normal / Wet,Predicted_Moderate Drought,Predicted_Severe Drought
+Actual_Normal / Wet,54,10,1
+Actual_Moderate Drought,17,5,4
+Actual_Severe Drought,12,0,3
