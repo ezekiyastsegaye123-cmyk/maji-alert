@@ -304,17 +304,27 @@ input:focus-visible {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select,
+.form-group textarea {
   padding: 10px 12px;
   font-size: 0.95rem;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface);
   color: var(--text-main);
+  font-family: inherit;
   min-height: 44px;
 }
 
-.form-group input.invalid {
+.form-group textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.form-group input.invalid,
+.form-group select.invalid,
+.form-group textarea.invalid {
   border-color: #c62828;
 }
 
@@ -342,6 +352,54 @@ input:focus-visible {
   background-color: var(--color-severe-bg);
   color: var(--color-severe-text);
   border: 1px solid var(--color-severe-accent);
+}
+
+.success-banner {
+  background-color: var(--color-normal-bg);
+  color: var(--color-normal-text);
+  border: 1px solid var(--color-normal-accent);
+}
+
+/* Operator Feedback Section */
+.feedback-section {
+  margin-top: 14px;
+}
+
+.feedback-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.feedback-summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  border-radius: 4px;
+}
+
+.section-title-inline {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.summary-badge {
+  background: rgba(2, 119, 189, 0.15);
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feedback-content {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
 }
 
 /* Processing Card */

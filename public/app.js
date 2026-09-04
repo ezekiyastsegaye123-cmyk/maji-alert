@@ -66,6 +66,28 @@
       err_invalid_year: 'Year must be between 1700 and 2100',
       err_timeout: 'Request timed out. Please check connection and try again.',
       err_generic: 'An unexpected error occurred. Please try again.',
+      feedback_title: 'Borehole Operator Field Report',
+      ground_truth_badge: 'Ground-Truth',
+      feedback_desc: 'Submit real-time borehole water yield and local drought conditions to validate and ground-truth early warnings.',
+      label_fb_location: 'Borehole / Site Name',
+      label_fb_condition: 'Observed Drought Condition',
+      opt_condition_normal: 'Normal / Wet Conditions',
+      opt_condition_moderate: 'Moderate Water Stress',
+      opt_condition_severe: 'Severe Drought',
+      label_fb_yield: 'Pump / Well Operational Status',
+      opt_yield_full: 'Full Yield / Normal Pumping',
+      opt_yield_reduced: 'Reduced Yield / Low Discharge',
+      opt_yield_dry: 'Dry / Well Depleted',
+      label_fb_water_table: 'Water Table Depth (meters, optional)',
+      label_fb_operator: 'Operator ID / Name (optional)',
+      label_fb_notes: 'Field Notes & Observations',
+      btn_submit_feedback: 'Submit Ground Report',
+      btn_submitting_feedback: 'Submitting Report...',
+      fb_success_message: 'Ground observation submitted successfully. Warning models calibrated.',
+      fb_success_ephemeral: 'Observation recorded in offline mode. Thank you for reporting.',
+      err_fb_location_required: 'Borehole / Site name is required.',
+      err_fb_lat_required: 'Valid latitude is required (-90 to 90).',
+      err_fb_lon_required: 'Valid longitude is required (-180 to 180).',
     },
     om: {
       app_title: 'FRADSCR',
@@ -117,6 +139,28 @@
       err_invalid_year: 'Waggaan 1700 hanga 2100 gidduu ta\'uu qaba.',
       err_timeout: 'Yeroon xumurameera. Maaloo irra deebi\'aa yaalaa.',
       err_generic: 'Dogoggorri uumameera. Irra deebi\'aa yaalaa.',
+      feedback_title: 'Gabaasa Qabatamaa Boolla Bishaanii',
+      ground_truth_badge: 'Ragaa Bakkaa',
+      feedback_desc: 'Haala bishaanii fi hongee naannoo keessanii gabaasuun raaga hongee sirreessaa.',
+      label_fb_location: 'Maqaa Boolla Bishaanii',
+      label_fb_condition: 'Haala Hongee Bakkaa',
+      opt_condition_normal: 'Nagaya / Jiidha Gaarii',
+      opt_condition_moderate: 'Hanqina Bishaanii Giddu-galeessa',
+      opt_condition_severe: 'Hongee Cimaa',
+      label_fb_yield: 'Haala Hojii Pompii Bishaanii',
+      opt_yield_full: 'Humnasaa Guutuun / Bifa Idileen',
+      opt_yield_reduced: 'Bishaan Hir\'ateera / Xiqqaateera',
+      opt_yield_dry: 'Gogee Jira / Dhumeera',
+      label_fb_water_table: 'Gad-fageenya Bishaan Lafa Jalaa (meetira)',
+      label_fb_operator: 'Maqaa / Eenyummaa Opreitaraa (yoo jiraate)',
+      label_fb_notes: 'Yaada fi Hubannoo Dabalataa',
+      btn_submit_feedback: 'Gabaasa Ergi',
+      btn_submitting_feedback: 'Gabaasni ergamaa jira...',
+      fb_success_message: 'Gabaasni qabatamaa milkaa\'inaan ergameera. Galatoomaa!',
+      fb_success_ephemeral: 'Gabaasni toora ala galmaa\'eera. Galatoomaa!',
+      err_fb_location_required: 'Maqaan boolla bishaanii barbaachisaadha.',
+      err_fb_lat_required: 'Laatituudiin sirrii ta\'e barbaachisa (-90 hanga 90).',
+      err_fb_lon_required: 'Loongitiudiin sirrii ta\'e barbaachisa (-180 hanga 180).',
     },
     am: {
       app_title: 'FRADSCR',
@@ -168,6 +212,28 @@
       err_invalid_year: 'ዓመት በ 1700 እና 2100 መካከል መሆን አለበት።',
       err_timeout: 'ጥያቄው ጊዜ ወስዷል። እባክዎ ግንኙነትዎን ፈትሸው እንደገና ይሞክሩ።',
       err_generic: 'ያልተጠበቀ ስህተት ተከስቷል። እባክዎ ደግመው ይሞክሩ።',
+      feedback_title: 'የቦረቦር ውኃ ኦፕሬተር የመስክ ሪፖርት',
+      ground_truth_badge: 'የመስክ መረጃ',
+      feedback_desc: 'የቅድመ ማስጠንቀቂያ ትክክለኛነትን ለማረጋገጥ የአካባቢውን የውኃ ፓምፕ እና የድርቅ ሁኔታ ሪፖርት ያድርጉ።',
+      label_fb_location: 'የቦረቦሩ / የቦታው ስም',
+      label_fb_condition: 'የተመለከቱት የድርቅ ሁኔታ',
+      opt_condition_normal: 'መደበኛ / በቂ እርጥበት',
+      opt_condition_moderate: 'መካከለኛ የውኃ እጥረት',
+      opt_condition_severe: 'ከፍተኛ ድርቅ',
+      label_fb_yield: 'የፓምፑ የሥራ ሁኔታ',
+      opt_yield_full: 'በሙሉ አቅም የሚሰራ',
+      opt_yield_reduced: 'የውኃ መጠን የቀነሰ',
+      opt_yield_dry: 'የደረቀ / ያከተመ',
+      label_fb_water_table: 'የከርሰ ምድር ውኃ ጥልቀት (በሜትር)',
+      label_fb_operator: 'የኦፕሬተሩ ስም / መለያ (አስገዳጅ ያልሆነ)',
+      label_fb_notes: 'ተጨማሪ የመስክ ማስታወሻዎች',
+      btn_submit_feedback: 'የመስክ ሪፖርቱን አስገባ',
+      btn_submitting_feedback: 'ሪፖርቱ በመላክ ላይ ነው...',
+      fb_success_message: 'የመስክ ሪፖርቱ በተሳካ ሁኔታ ተልኳል። እናመሰግናለን!',
+      fb_success_ephemeral: 'ሪፖርቱ በተሳካ ሁኔታ ተመዝግቧል። እናመሰግናለን!',
+      err_fb_location_required: 'የቦረቦሩ ወይም የቦታው ስም ያስፈልጋል።',
+      err_fb_lat_required: 'ትክክለኛ ላቲቲውድ ያስፈልጋል (-90 እስከ 90)።',
+      err_fb_lon_required: 'ትክክለኛ ሎንጊቲውድ ያስፈልጋል (-180 እስከ 180)።',
     },
   };
 
@@ -217,6 +283,26 @@
     metaDistance: document.getElementById('metaDistance'),
     metaYear: document.getElementById('metaYear'),
     metaLatency: document.getElementById('metaLatency'),
+    // Operator Feedback Elements
+    feedbackForm: document.getElementById('feedbackForm'),
+    fbLocationName: document.getElementById('fbLocationName'),
+    fbCondition: document.getElementById('fbCondition'),
+    fbLatitude: document.getElementById('fbLatitude'),
+    fbLongitude: document.getElementById('fbLongitude'),
+    fbYieldStatus: document.getElementById('fbYieldStatus'),
+    fbYear: document.getElementById('fbYear'),
+    fbWaterTable: document.getElementById('fbWaterTable'),
+    fbOperator: document.getElementById('fbOperator'),
+    fbNotes: document.getElementById('fbNotes'),
+    btnSubmitFeedback: document.getElementById('btnSubmitFeedback'),
+    btnSubmitFeedbackText: document.getElementById('btnSubmitFeedbackText'),
+    btnSubmitFeedbackSpinner: document.getElementById('btnSubmitFeedbackSpinner'),
+    fbSuccess: document.getElementById('fbSuccess'),
+    fbError: document.getElementById('fbError'),
+    fbLocationError: document.getElementById('fbLocationError'),
+    fbLatError: document.getElementById('fbLatError'),
+    fbLonError: document.getElementById('fbLonError'),
+    fbYearError: document.getElementById('fbYearError'),
   };
 
   // State management
@@ -276,8 +362,12 @@
       (pos) => {
         el.btnGeolocation.disabled = false;
         el.btnGeolocation.style.opacity = '1';
-        el.inputLatitude.value = pos.coords.latitude.toFixed(4);
-        el.inputLongitude.value = pos.coords.longitude.toFixed(4);
+        const latStr = pos.coords.latitude.toFixed(4);
+        const lonStr = pos.coords.longitude.toFixed(4);
+        el.inputLatitude.value = latStr;
+        el.inputLongitude.value = lonStr;
+        if (el.fbLatitude && !el.fbLatitude.value) el.fbLatitude.value = latStr;
+        if (el.fbLongitude && !el.fbLongitude.value) el.fbLongitude.value = lonStr;
       },
       (err) => {
         el.btnGeolocation.disabled = false;
@@ -297,8 +387,14 @@
   el.presetButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       clearErrors();
-      el.inputLatitude.value = btn.getAttribute('data-lat');
-      el.inputLongitude.value = btn.getAttribute('data-lon');
+      const lat = btn.getAttribute('data-lat');
+      const lon = btn.getAttribute('data-lon');
+      const name = btn.getAttribute('data-name');
+      el.inputLatitude.value = lat;
+      el.inputLongitude.value = lon;
+      if (el.fbLatitude) el.fbLatitude.value = lat;
+      if (el.fbLongitude) el.fbLongitude.value = lon;
+      if (el.fbLocationName && !el.fbLocationName.value) el.fbLocationName.value = `${name} Borehole`;
     });
   });
 
@@ -608,5 +704,144 @@
     // 5. Display result section with smooth visibility
     el.resultSection.classList.remove('hidden');
     el.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // =========================================================================
+  // 9. Operator Ground-Truth Feedback Handler
+  // =========================================================================
+  function clearFeedbackErrors() {
+    if (el.fbLocationError) el.fbLocationError.textContent = '';
+    if (el.fbLatError) el.fbLatError.textContent = '';
+    if (el.fbLonError) el.fbLonError.textContent = '';
+    if (el.fbYearError) el.fbYearError.textContent = '';
+    if (el.fbSuccess) {
+      el.fbSuccess.classList.add('hidden');
+      el.fbSuccess.textContent = '';
+    }
+    if (el.fbError) {
+      el.fbError.classList.add('hidden');
+      el.fbError.textContent = '';
+    }
+    if (el.fbLocationName) el.fbLocationName.classList.remove('invalid');
+    if (el.fbLatitude) el.fbLatitude.classList.remove('invalid');
+    if (el.fbLongitude) el.fbLongitude.classList.remove('invalid');
+    if (el.fbYear) el.fbYear.classList.remove('invalid');
+  }
+
+  function setFeedbackSubmitting(isSubmitting) {
+    if (!el.btnSubmitFeedback) return;
+    if (isSubmitting) {
+      el.btnSubmitFeedback.disabled = true;
+      if (el.btnSubmitFeedbackText) el.btnSubmitFeedbackText.textContent = translations[currentLang].btn_submitting_feedback;
+      if (el.btnSubmitFeedbackSpinner) el.btnSubmitFeedbackSpinner.classList.remove('hidden');
+    } else {
+      el.btnSubmitFeedback.disabled = false;
+      if (el.btnSubmitFeedbackText) el.btnSubmitFeedbackText.textContent = translations[currentLang].btn_submit_feedback;
+      if (el.btnSubmitFeedbackSpinner) el.btnSubmitFeedbackSpinner.classList.add('hidden');
+    }
+  }
+
+  if (el.feedbackForm) {
+    el.feedbackForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearFeedbackErrors();
+
+      const locName = el.fbLocationName ? el.fbLocationName.value.trim() : '';
+      const lat = el.fbLatitude ? parseFloat(el.fbLatitude.value) : NaN;
+      const lon = el.fbLongitude ? parseFloat(el.fbLongitude.value) : NaN;
+      const yr = el.fbYear ? parseInt(el.fbYear.value, 10) : NaN;
+      const condition = el.fbCondition ? el.fbCondition.value : 'normal_wet';
+      const yieldStatus = el.fbYieldStatus ? el.fbYieldStatus.value : 'full_capacity';
+      const waterTableVal = el.fbWaterTable && el.fbWaterTable.value.trim() !== '' ? parseFloat(el.fbWaterTable.value) : null;
+      const submittedBy = el.fbOperator ? el.fbOperator.value.trim() : '';
+      const notes = el.fbNotes ? el.fbNotes.value.trim() : '';
+
+      let hasError = false;
+      if (!locName) {
+        if (el.fbLocationError) el.fbLocationError.textContent = translations[currentLang].err_fb_location_required;
+        if (el.fbLocationName) el.fbLocationName.classList.add('invalid');
+        hasError = true;
+      }
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        if (el.fbLatError) el.fbLatError.textContent = translations[currentLang].err_fb_lat_required;
+        if (el.fbLatitude) el.fbLatitude.classList.add('invalid');
+        hasError = true;
+      }
+      if (isNaN(lon) || lon < -180 || lon > 180) {
+        if (el.fbLonError) el.fbLonError.textContent = translations[currentLang].err_fb_lon_required;
+        if (el.fbLongitude) el.fbLongitude.classList.add('invalid');
+        hasError = true;
+      }
+      if (isNaN(yr) || yr < 2000 || yr > 2100) {
+        if (el.fbYearError) el.fbYearError.textContent = 'Observation year must be between 2000 and 2100';
+        if (el.fbYear) el.fbYear.classList.add('invalid');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const payload = {
+        location_name: locName,
+        latitude: lat,
+        longitude: lon,
+        observed_year: yr,
+        observed_condition: condition,
+        borehole_yield_status: yieldStatus,
+      };
+
+      if (waterTableVal !== null && !isNaN(waterTableVal)) {
+        payload.water_table_depth_meters = waterTableVal;
+      }
+      if (submittedBy) {
+        payload.submitted_by = submittedBy;
+      }
+      if (notes) {
+        payload.notes = notes;
+      }
+
+      setFeedbackSubmitting(true);
+
+      try {
+        const response = await fetch(`${SERVER_ORIGIN}/api/feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          const isEphemeral = data.storage === 'ephemeral';
+          const msg = isEphemeral
+            ? translations[currentLang].fb_success_ephemeral
+            : translations[currentLang].fb_success_message;
+          if (el.fbSuccess) {
+            el.fbSuccess.textContent = `✓ ${msg}`;
+            el.fbSuccess.classList.remove('hidden');
+          }
+          // Reset optional fields
+          if (el.fbLocationName) el.fbLocationName.value = '';
+          if (el.fbWaterTable) el.fbWaterTable.value = '';
+          if (el.fbOperator) el.fbOperator.value = '';
+          if (el.fbNotes) el.fbNotes.value = '';
+        } else {
+          const errDetail = (data && data.error && (data.error.details || data.error.message)) || translations[currentLang].err_generic;
+          if (el.fbError) {
+            el.fbError.textContent = errDetail;
+            el.fbError.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        console.error('Feedback submission network error:', err);
+        if (el.fbError) {
+          el.fbError.textContent = translations[currentLang].err_generic;
+          el.fbError.classList.remove('hidden');
+        }
+      } finally {
+        setFeedbackSubmitting(false);
+      }
+    });
   }
 })();

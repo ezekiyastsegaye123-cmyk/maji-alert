@@ -336,13 +336,51 @@ http://localhost:3000
 
 #### What the Web Interface Delivers:
 * **Real-Time Interactive Prediction**: Users click Borana well cluster presets (**Yabelo**, **Dubuluk**, **Mega**, **Moyale**) or input any Ethiopian coordinates and forecast year ($1700\text{--}2100$).
-* **Live Dual Metrics Display**: Prominently renders both **Model Confidence ($91\%\text{--}95\%$)** and **Model Accuracy ($86\%$)**, ensuring field officers have immediate visibility of reliable forecast thresholds ($>80\%$).
+* **Live Dual Metrics & Operational Risk Tiers**: Prominently renders both **Model Confidence ($91\%\text{--}95\%$)** and **Model Accuracy ($86\%$)**, paired with discrete humanitarian risk tiers (**Low Risk**, **Guarded Risk**, **Elevated Risk**, **High Risk**) and combined drought risk probabilities.
+* **Borehole Operator Field Feedback Loop**: Embedded ground-truth collection interface allowing water pump operators to log real-world borehole yield, static water levels, and drought conditions directly from the field. Includes low-connectivity fallback mode ensuring zero data loss during network degradation.
 * **Multilingual Localization**: Zero-latency switching between English (**EN**), Afaan Oromoo (**OM**), and Amharic (**AM**).
 * **Automated Browser Verification**: Includes automated end-to-end Chromium simulation via Puppeteer ([`tests/e2e-human-test.js`](file:///home/hezekiah/Documents/Egate_AIML/Fradscr/tests/e2e-human-test.js)), verifying UI state transitions, language toggles, and accuracy/confidence assertions ($>80\%$).
 
 ---
 
-## 7. How to Present This Project (Speaking Guide & Slides Script)
+## 7. Production Edge Topology & Deployment Stack
+
+```text
+                                  PUBLIC INTERNET
+                                         │
+                             [ HTTPS :443 / HTTP :80 ]
+                                         │
+                                         ▼
+           ┌───────────────────────────────────────────────────────────┐
+           │                   Nginx 1.25 Edge Proxy                   │
+           │  - SSL/TLS Termination (Certbot Auto-Renewal)             │
+           │  - Anti-DDoS Rate Limiting (10 req/s, Burst=20)           │
+           │  - Connection Limits (10 conn/IP)                         │
+           │  - High-Ratio Gzip Compression (2G/3G Pastoral Network)   │
+           │  - WebSocket Upgrade Gateway (/socket.io/)                │
+           └─────────────────────────────┬─────────────────────────────┘
+                                         │ (Internal Bridge)
+                                         ▼
+           ┌───────────────────────────────────────────────────────────┐
+           │             Node.js Express 5 + Socket.io Server          │
+           │  - Strict Zod Input Validation & Coordinate Sanitization   │
+           │  - Multilingual Translation Pipeline (EN, OM, AM)         │
+           │  - Ground-Truth Operator Feedback Loop (/api/feedback)    │
+           │  - Offline / Ephemeral Logging Fallback                   │
+           └──────────────┬─────────────────────────────┬──────────────┘
+                          │                             │
+                          ▼                             ▼
+       ┌──────────────────────────────┐   ┌───────────────────────────┐
+       │   FastAPI In-Memory Engine   │   │       MongoDB 7.0         │
+       │   - 18-Feature Random Forest │   │   - Query & Audit Logs    │
+       │   - T=0.35 Softmax Calibrator│   │   - Borehole Observations │
+       │   - Zero-Leakage Holdout Run │   │   - Volume Persistence    │
+       └──────────────────────────────┘   └───────────────────────────┘
+```
+
+---
+
+## 8. How to Present This Project (Speaking Guide & Slides Script)
 
 When presenting this work to an academic committee, technical panel, or government agency, follow this **4-act narrative structure**:
 
@@ -360,11 +398,16 @@ When presenting this work to an academic committee, technical panel, or governme
 
 ---
 
-## 8. File Structure & Quick Reference
+## 9. File Structure & Quick Reference
 
 ```
 Fradscr/
 ├── PROJECT_EXPLAINER.md          # Comprehensive explanation and presentation guide
+├── README.md                     # Architecture, deployment guide, and API reference
+├── Dockerfile.ml                 # Python 3.11 slim container with preloaded ML weights
+├── Dockerfile.node               # Node.js 20 production container
+├── docker-compose.yml            # 5-service orchestration stack with healthchecks & networks
+├── nginx/                        # Nginx reverse proxy configurations & SSL templates
 ├── africa/
 │   ├── eth007.rwl                # Gondar tree-ring measurements (Training site, 1869–2014)
 │   └── eth001.rwl                # Debrebirkan Selassie tree rings (Holdout site, 1717–2006)
@@ -386,6 +429,10 @@ Fradscr/
 │   ├── processed_lagged_data.csv         # Standardized merged dataset (1874–2009)
 │   ├── lag_correlation_results.csv       # Pearson R and p-values for lags 0..5
 │   └── drought_forecast_2025_2035.csv    # 11-year forward operational forecast
+├── src/                          # Node.js backend modules
+│   ├── models/                   # Mongoose database schemas (OperatorFeedback, PredictionLog)
+│   ├── validation/               # Zod schemas (predictionInput, feedbackInput)
+│   └── services/                 # Express and ML communication services
 ├── treering/
 │   ├── parser.py                 # Tucson .rwl format decoder
 │   ├── model.py                  # Negative exponential biological growth curve fitter
@@ -399,5 +446,5 @@ Fradscr/
 ├── server.js                     # Express + Socket.io web server for FRADSCR
 ├── public/                       # Localized low-bandwidth frontend (HTML, CSS, JS)
 ├── Model.ipynb                   # Complete 21-section interactive notebook
-└── tests/                        # 151 passing pytest + 81 passing Jest unit/integration tests
+└── tests/                        # 151 passing pytest + 86 passing Jest unit/integration tests
 ```

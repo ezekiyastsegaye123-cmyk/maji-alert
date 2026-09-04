@@ -445,4 +445,109 @@ curl http://localhost/health
 docker compose down
 ```
 
+---
+
+## Operator Field Feedback & Ground-Truth Reconciliation API
+
+FRADSCR incorporates a closed-loop field validation architecture connecting pastoral borehole operators and regional water bureaus across Borana Zone directly to the forecasting system:
+
+### 1. Endpoint Specification
+
+#### `POST /api/feedback`
+Submits real-time borehole water status and ground-truth drought observations.
+
+**Request Payload (`application/json`):**
+```json
+{
+  "location_name": "Dubuluk Well Cluster #02",
+  "latitude": 4.45,
+  "longitude": 38.28,
+  "observed_year": 2026,
+  "observed_condition": "severe_drought",
+  "borehole_yield_status": "reduced_yield",
+  "water_table_depth_meters": 45.2,
+  "notes": "Static water level dropped 3.2m; high pastoral livestock concentration.",
+  "submitted_by": "Borana Water Bureau / Op #4"
+}
+```
+
+**Field Validation & Constraints (Enforced via Zod):**
+- `location_name`: string (1–100 chars, trimmed, required)
+- `latitude`: float ($-90.0 \le \text{lat} \le 90.0$, required)
+- `longitude`: float ($-180.0 \le \text{lon} \le 180.0$, required)
+- `observed_year`: integer ($2000 \le \text{year} \le 2100$, required)
+- `observed_condition`: enum (`normal_wet`, `moderate_stress`, `severe_drought`, required)
+- `borehole_yield_status`: enum (`full_capacity`, `reduced_yield`, `dry_or_depleted`, required)
+- `water_table_depth_meters`: float ($0.0 \le \text{depth} \le 1000.0$, optional/nullable)
+- `submitted_by`: string (max 100 chars, optional)
+- `notes`: string (max 500 chars, optional)
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Borehole feedback logged successfully",
+  "feedbackId": "6a9b36e13cd41137511ef670"
+}
+```
+
+#### `GET /api/feedback`
+Queries logged ground-truth observations with pagination support.
+
+**Query Parameters:**
+- `limit`: number of records (default: 50, max: 100)
+- `skip`: pagination offset (default: 0)
+
+### 2. High-Availability Low-Bandwidth Fallback
+Pastoral zones in southern Ethiopia frequently experience sporadic cellular connectivity and intermittent database infrastructure. 
+If MongoDB is temporarily unavailable (`mongoose.connection.readyState !== 1`):
+- The feedback endpoint returns `200 OK` (`status: "accepted_ephemeral"`).
+- Feedback is written directly to the structured file system audit log.
+- Zero field reports are dropped or produce HTTP 500 errors for borehole operators.
+
+---
+
+## Satellite & Climatological Auxiliary Observation Ingestion
+
+In addition to physical tree-ring dendrochronology and Schwabe solar cycles, FRADSCR accommodates continuous cross-validation against high-resolution Earth Observation (EO) feeds:
+
+### 1. Satellite Observation Ingestion Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│              Multi-Source Validation Pipeline                    │
+└─────────────────────────────────────────────────────────────────┘
+         │                                       │
+         ▼                                       ▼
+┌───────────────────────────────┐     ┌───────────────────────────┐
+│   Satellite Earth Observation │     │  Operator Ground-Truth    │
+│   - CHIRPS Precipitation (0.05°)│     │  - Static Water Levels    │
+│   - MODIS/Sentinel NDVI/EVI   │     │  - Pump Operational Quota │
+│   - SMAP L4 Soil Moisture      │     │  - Livestock Stress Notes │
+└───────────────────────────────┘     └───────────────────────────┘
+         │                                       │
+         └───────────────────┬───────────────────┘
+                             │
+                             ▼
+              ┌─────────────────────────────┐
+              │ Ground-Truth Reconciliation │
+              │ - Confusion Matrix Tracking │
+              │ - Brier Reliability Score   │
+              │ - False Alarm Mitigation    │
+              └─────────────────────────────┘
+                             │
+                             ▼
+              ┌─────────────────────────────┐
+              │ Retraining & Model Updating │
+              │ (Zero-Leakage Holdout Rule) │
+              └─────────────────────────────┘
+```
+
+### 2. Supported Auxiliary Datasets
+1. **CHIRPS v2.0 (Rainfall Anomalies)**: High-resolution ($0.05^\circ$) quasi-global precipitation estimates used to independently confirm Kiremt / Belg monsoon deficit timing.
+2. **MODIS Terra/Aqua & Sentinel-2 (NDVI/NDWI)**: Normalized Difference Vegetation and Water Indices providing real-time pasture greenness and water canopy metrics.
+3. **NASA SMAP L4 (Root-Zone Soil Moisture)**: $9\,\text{km}$ global soil moisture anomalies measuring deep aquifer replenishment potential.
+4. **NOAA PSL Oceanic Teleconnections**: Operational updates for El Niño–Southern Oscillation (Niño 3.4 index) and Indian Ocean Dipole (Dipole Mode Index - DMI).
+
+
 

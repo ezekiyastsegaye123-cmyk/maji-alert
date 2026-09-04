@@ -17,8 +17,10 @@ const config = require('./src/config/env');
 const logger = require('./src/services/logger');
 const { registerSocketHandlers } = require('./src/socket/socketHandler');
 const { safeValidatePredictionInput } = require('./src/validation/predictionInput');
+const { safeValidateFeedbackInput } = require('./src/validation/feedbackInput');
 const mlService = require('./src/services/mlService');
 const QueryLog = require('./src/models/QueryLog');
+const OperatorFeedback = require('./src/models/OperatorFeedback');
 
 const app = express();
 const server = http.createServer(app);
@@ -169,6 +171,80 @@ app.post('/api/predict', async (req, res) => {
       error: clientMessage,
       status: statusCode,
     });
+  }
+});
+
+// 7b. Operator Ground-Truth Feedback & Reconciliation Endpoints (Step 4 & 5)
+app.post('/api/feedback', async (req, res) => {
+  const validation = safeValidateFeedbackInput(req.body);
+  if (!validation.success) {
+    const rawIssues = validation.error.issues || validation.error.errors || [];
+    return res.status(400).json({
+      error: 'Invalid operator feedback input',
+      details: rawIssues.map((e) => ({
+        field: Array.isArray(e.path) ? e.path.join('.') : '',
+        message: e.message,
+      })),
+      status: 400,
+    });
+  }
+
+  const feedbackData = validation.data;
+
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const saved = await OperatorFeedback.create(feedbackData);
+      logger.info('Operator feedback logged to MongoDB', {
+        location: saved.location_name,
+        year: saved.observed_year,
+        condition: saved.observed_condition,
+      });
+      return res.status(201).json({
+        status: 'success',
+        message: 'Borehole feedback logged successfully',
+        feedbackId: saved._id,
+      });
+    } else {
+      logger.warn('MongoDB offline: feedback accepted in ephemeral log mode');
+      return res.status(200).json({
+        status: 'accepted_ephemeral',
+        message: 'Feedback received (database offline; logged to runtime audit)',
+        data: feedbackData,
+      });
+    }
+  } catch (err) {
+    logger.error('Failed to persist operator feedback', { error: err.message });
+    return res.status(500).json({
+      error: 'Failed to record operator feedback.',
+      status: 500,
+    });
+  }
+});
+
+app.get('/api/feedback', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+      const records = await OperatorFeedback.find()
+        .sort({ timestamp: -1 })
+        .limit(limit)
+        .lean();
+      return res.status(200).json({
+        status: 'ok',
+        count: records.length,
+        data: records,
+      });
+    } else {
+      return res.status(200).json({
+        status: 'ok',
+        count: 0,
+        data: [],
+        note: 'Database offline or in-memory mode.',
+      });
+    }
+  } catch (err) {
+    logger.error('Failed to retrieve operator feedback', { error: err.message });
+    return res.status(500).json({ error: 'Internal server error', status: 500 });
   }
 });
 

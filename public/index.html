@@ -225,6 +225,147 @@
           </div>
         </div>
       </section>
+
+      <!-- Operator Ground-Truth Feedback Section -->
+      <section class="card feedback-section" aria-labelledby="feedbackSectionTitle">
+        <details id="feedbackDetails">
+          <summary id="feedbackSummary" class="feedback-summary">
+            <span class="summary-icon" aria-hidden="true">📝</span>
+            <span id="feedbackSectionTitle" class="section-title-inline" data-i18n="feedback_title">Borehole Operator Field Report</span>
+            <span class="summary-badge" data-i18n="ground_truth_badge">Ground-Truth</span>
+          </summary>
+          <div class="feedback-content">
+            <p class="section-desc" data-i18n="feedback_desc">
+              Submit real-time borehole water yield and local drought conditions to validate and ground-truth early warnings.
+            </p>
+
+            <form id="feedbackForm" novalidate>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="fbLocationName" data-i18n="label_fb_location">Borehole / Site Name</label>
+                  <input
+                    type="text"
+                    id="fbLocationName"
+                    name="location_name"
+                    placeholder="e.g. Dubuluk Well 02"
+                    required
+                    maxlength="100"
+                  />
+                  <span id="fbLocationError" class="field-error" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbCondition" data-i18n="label_fb_condition">Observed Drought Condition</label>
+                  <select id="fbCondition" name="observed_condition" required>
+                    <option value="normal_wet" data-i18n="opt_condition_normal">Normal / Wet Conditions</option>
+                    <option value="moderate_stress" data-i18n="opt_condition_moderate">Moderate Water Stress</option>
+                    <option value="severe_drought" data-i18n="opt_condition_severe">Severe Drought</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbLatitude" data-i18n="label_latitude">Latitude (°N/S)</label>
+                  <input
+                    type="number"
+                    id="fbLatitude"
+                    name="latitude"
+                    step="any"
+                    min="-90"
+                    max="90"
+                    placeholder="e.g. 4.45"
+                    required
+                  />
+                  <span id="fbLatError" class="field-error" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbLongitude" data-i18n="label_longitude">Longitude (°E/W)</label>
+                  <input
+                    type="number"
+                    id="fbLongitude"
+                    name="longitude"
+                    step="any"
+                    min="-180"
+                    max="180"
+                    placeholder="e.g. 38.28"
+                    required
+                  />
+                  <span id="fbLonError" class="field-error" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbYieldStatus" data-i18n="label_fb_yield">Pump / Well Operational Status</label>
+                  <select id="fbYieldStatus" name="borehole_yield_status" required>
+                    <option value="full_capacity" data-i18n="opt_yield_full">Full Yield / Normal Pumping</option>
+                    <option value="reduced_yield" data-i18n="opt_yield_reduced">Reduced Yield / Low Discharge</option>
+                    <option value="dry_or_depleted" data-i18n="opt_yield_dry">Dry / Well Depleted</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbYear" data-i18n="label_year">Observation Year</label>
+                  <input
+                    type="number"
+                    id="fbYear"
+                    name="observed_year"
+                    step="1"
+                    min="2000"
+                    max="2100"
+                    value="2026"
+                    required
+                  />
+                  <span id="fbYearError" class="field-error" aria-live="polite"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="fbWaterTable" data-i18n="label_fb_water_table">Water Table Depth (meters, optional)</label>
+                  <input
+                    type="number"
+                    id="fbWaterTable"
+                    name="water_table_depth_meters"
+                    step="0.1"
+                    min="0"
+                    max="1000"
+                    placeholder="e.g. 42.5"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="fbOperator" data-i18n="label_fb_operator">Operator ID / Name (optional)</label>
+                  <input
+                    type="text"
+                    id="fbOperator"
+                    name="submitted_by"
+                    placeholder="e.g. Borana Water Bureau / Op #4"
+                    maxlength="100"
+                  />
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label for="fbNotes" data-i18n="label_fb_notes">Field Notes & Observations</label>
+                  <textarea
+                    id="fbNotes"
+                    name="notes"
+                    rows="2"
+                    placeholder="e.g. Static water level dropped 3m; high pastoral livestock pressure."
+                    maxlength="500"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="submit-container">
+                <button type="submit" id="btnSubmitFeedback" class="btn btn-secondary">
+                  <span id="btnSubmitFeedbackText" data-i18n="btn_submit_feedback">Submit Ground Report</span>
+                  <span id="btnSubmitFeedbackSpinner" class="spinner hidden" aria-hidden="true"></span>
+                </button>
+              </div>
+            </form>
+
+            <div id="fbSuccess" class="alert-banner success-banner hidden" role="status" aria-live="polite"></div>
+            <div id="fbError" class="alert-banner error-banner hidden" role="alert" aria-live="assertive"></div>
+          </div>
+        </details>
+      </section>
     </main>
 
     <footer class="app-footer" role="contentinfo">
