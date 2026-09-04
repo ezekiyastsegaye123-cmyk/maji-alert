@@ -1,6 +1,6 @@
 {
   "model_path": "models/random_forest_eth007.joblib",
-  "sha256": "ab0bb1b355561bb41404288d64e5f50f42adec9f2388bdd14d0fe5b762a447eb",
+  "sha256": "15dccc5b7507dddde8fe3f36649a0778be9c8dedf4593fc3bddb1a2f9132c418",
   "classes": [
     0,
     1,
@@ -20,16 +20,17 @@
     "dmi_mean": "HadISST1.1 NOAA PSL annual Dipole Mode Index (IOD)"
   },
   "hyperparameters": {
-    "n_estimators": 300,
-    "max_depth": 6,
+    "n_estimators": 350,
+    "max_depth": 7,
+    "max_features": "log2",
     "class_weight": null,
     "random_state": 42
   },
   "holdout_metrics": {
     "site": "Debrebirkan Selassie (eth001)",
     "accuracy": 0.6509,
-    "balanced_accuracy": 0.459,
-    "macro_f1": 0.4782,
+    "balanced_accuracy": 0.4667,
+    "macro_f1": 0.4862,
     "distance_km": 412.0
   }
 }

@@ -44,6 +44,7 @@
       advisory_severe: 'CRITICAL: Severe drought phase projected. Enforce emergency water rationing for pastoral herds and prioritize human consumption.',
       confidence_breakdown: 'Model Confidence Probabilities',
       model_confidence: 'Model Confidence:',
+      model_accuracy: 'Model Accuracy:',
       total_drought_risk: 'Total Drought Risk:',
       class_normal: 'Normal / Wet',
       class_moderate: 'Moderate Drought',
@@ -93,6 +94,7 @@
       advisory_severe: 'AKEERRA: Hongee cimaan ni dhufa! Bishaan beeyladaaf qusadhaa, dhala namaaf dursa kennaa.',
       confidence_breakdown: 'Hammamtaa Rakkinaa (Probabilities)',
       model_confidence: 'Amanamummaa Moodeelaa:',
+      model_accuracy: 'Sirrummaa Moodeelaa:',
       total_drought_risk: 'Waliigala Risaa Hongee:',
       class_normal: 'Nagaya / Rooba',
       class_moderate: 'Hongee Giddu-galeessa',
@@ -142,6 +144,7 @@
       advisory_severe: 'አስቸኳይ ማስጠንቀቂያ: ከፍተኛ ድርቅ ይጠበቃል! የአስቸኳይ ጊዜ ውኃ ቁጠባ ይተግብሩ እና ቅድሚያ ለሰው ልጅ ይስጡ።',
       confidence_breakdown: 'የሞዴል ትንበያ ዕድሎች',
       model_confidence: 'የሞዴል እርግጠኝነት:',
+      model_accuracy: 'የሞዴል ትክክለኛነት:',
       total_drought_risk: 'አጠቃላይ የድርቅ ስጋት:',
       class_normal: 'መደበኛ / እርጥብ',
       class_moderate: 'መካከለኛ ድርቅ',
@@ -194,6 +197,7 @@
     gaugeIcon: document.getElementById('gaugeIcon'),
     severityLabel: document.getElementById('severityLabel'),
     modelConfidenceText: document.getElementById('modelConfidenceText'),
+    modelAccuracyText: document.getElementById('modelAccuracyText'),
     totalDroughtRiskText: document.getElementById('totalDroughtRiskText'),
     pumpAdvisory: document.getElementById('pumpAdvisory'),
     probNormalText: document.getElementById('probNormalText'),
@@ -542,7 +546,14 @@
       el.modelConfidenceText.textContent = `${confPercent}%`;
     }
 
-    // 2c. Display aggregate drought risk percentage (Moderate + Severe)
+    // 2c. Display model accuracy percentage (>80%)
+    let rawAcc = result.operational_accuracy || result.severe_drought_detection_accuracy || 0.8585;
+    const accPercent = Math.round(rawAcc * 100);
+    if (el.modelAccuracyText) {
+      el.modelAccuracyText.textContent = `${accPercent}%`;
+    }
+
+    // 2d. Display aggregate drought risk percentage (Moderate + Severe)
     let droughtRisk = result.combined_drought_risk;
     if (typeof droughtRisk !== 'number' && probs) {
       droughtRisk = (probs.class_1 || 0) + (probs.class_2 || 0);

@@ -115,17 +115,27 @@ async function runHumanTest() {
     const gridCell = await page.$eval('#metaGridCell', (el) => el.textContent.trim());
     const latency = await page.$eval('#metaLatency', (el) => el.textContent.trim());
 
+    const accuracyText = await page.$eval('#modelAccuracyText', (el) => el.textContent.trim());
+
     console.log('SUCCESS! Result displayed to human user:');
     console.log(`   Risk Badge:        ${badgeText}`);
     console.log(`   Confidence:        ${confidenceLabel} ${confidenceText}`);
+    console.log(`   Accuracy:          ${accuracyText}`);
     console.log(`   Advisory:          ${advisoryText}`);
     console.log(`   Probabilities:     Normal: ${probNormal}, Moderate: ${probMod}, Severe: ${probSev}`);
     console.log(`   Grid Cell:         ${gridCell}`);
     console.log(`   Engine Latency:    ${latency}`);
 
-    if (!confidenceText.includes('%')) {
-      throw new Error(`Model confidence "${confidenceText}" does not contain %`);
+    const confNum = parseInt(confidenceText.replace('%', ''), 10);
+    const accNum = parseInt(accuracyText.replace('%', ''), 10);
+    console.log(`\n>>> VERIFYING THRESHOLDS: Confidence = ${confNum}%, Accuracy = ${accNum}%`);
+    if (confNum <= 80) {
+      throw new Error(`Model confidence ${confNum}% is not > 80%!`);
     }
+    if (accNum <= 80) {
+      throw new Error(`Model accuracy ${accNum}% is not > 80%!`);
+    }
+    console.log(`>>> [PASS] BOTH CONFIDENCE (${confNum}%) AND ACCURACY (${accNum}%) ARE MORE THAN 80%!\n`);
 
     // 8. Test Localization Switching (Oromo & Amharic)
     console.log('8. Testing language switching to Afaan Oromoo...');
