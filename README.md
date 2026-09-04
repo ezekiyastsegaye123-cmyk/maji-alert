@@ -380,30 +380,66 @@ npm test
 
 ---
 
-## Production Docker Deployment
+## Production Docker & Reverse Proxy Deployment
 
-FRADSCR is fully containerized for high-availability production environments:
+FRADSCR is fully containerized and reverse-proxied for high-availability production environments:
 
-### 1. Start Multi-Container Stack
+### 1. Architectural Topology
+
+```text
+Public Internet (HTTPS :443 / HTTP :80)
+        │
+        ▼
+   Nginx Reverse Proxy (DDoS Rate Limiter, SSL/TLS, Gzip Compression)
+        │
+        ├── /.well-known/acme-challenge/ ──> Certbot (Let's Encrypt Auto-Renewal)
+        │
+        └── http://web-app:3000 (Internal Docker Bridge Network)
+                 │
+                 ├── WebSocket / REST API Gateway
+                 │
+                 ├── http://ml-service:8000 (FastAPI In-Memory ML Engine)
+                 └── mongodb:27017 (Audit Query Log)
+```
+
+### 2. Start Full Production Stack
 
 ```bash
-# Build images and launch background services
+# Build images and launch background services with reverse proxy
 docker compose up -d --build
 ```
 
-This starts:
-- **`fradscr-ml-service`**: Persistent in-memory FastAPI ML prediction service (port 8000, internal-only).
-- **`fradscr-mongodb`**: Audit & query logging store with healthcheck.
-- **`fradscr-web-app`**: Express 5 + Socket.io gateway serving low-bandwidth UI (port 3000).
+This launches 5 coordinated services:
+- **`reverse-proxy`**: Nginx 1.25 edge server enforcing rate limiting (`10r/s`), Gzip compression for 2G/3G networks, and secure HTTP/WebSocket proxying (ports `80`, `443`).
+- **`web-app`**: Node.js Express 5 + Socket.io application gateway.
+- **`ml-service`**: Persistent in-memory FastAPI ML prediction service (isolated on `fradscr_internal` network).
+- **`mongodb`**: Audit & query logging store with volume persistence (`mongo_data`).
+- **`certbot`**: Automated Let's Encrypt SSL/TLS certificate renewal daemon.
 
-### 2. Verify Container Health
+### 3. Verify System Health
 
 ```bash
+# Check container status
 docker compose ps
-curl http://localhost:3000/health
+
+# Test edge proxy health endpoint
+curl http://localhost/health
 ```
 
-### 3. Stop Stack
+### 4. Enable Custom Domain SSL/TLS
+
+1. Copy `nginx/conf.d/ssl.conf.template` to `nginx/conf.d/ssl.conf`.
+2. Replace `drought-warning.example.org` with your registered domain name.
+3. Request your initial certificate using certbot:
+   ```bash
+   docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d yourdomain.com
+   ```
+4. Reload Nginx:
+   ```bash
+   docker compose exec reverse-proxy nginx -s reload
+   ```
+
+### 5. Stop Stack
 
 ```bash
 docker compose down
