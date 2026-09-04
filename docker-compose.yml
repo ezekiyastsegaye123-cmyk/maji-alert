@@ -1,0 +1,84 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. MongoDB Service (Optional persistence with automatic in-memory fallback)
+  # ----------------------------------------------------------------------------
+  mongodb:
+    image: mongo:7.0
+    container_name: fradscr-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: fradscr
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - fradscr_internal
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ----------------------------------------------------------------------------
+  # 2. Python ML Microservice (FastAPI + In-Memory Random Forest Inference Engine)
+  # ----------------------------------------------------------------------------
+  ml-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.ml
+    container_name: fradscr-ml-service
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+    networks:
+      - fradscr_internal
+    # Only internal network access; not exposed directly to host/public internet
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 25s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ----------------------------------------------------------------------------
+  # 3. Node.js Express Gateway & Socket.io Web Application
+  # ----------------------------------------------------------------------------
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    container_name: fradscr-web-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - ML_SERVICE_URL=http://ml-service:8000
+      - ML_REQUEST_TIMEOUT_MS=15000
+      - MONGODB_URI=mongodb://mongodb:27017/fradscr
+      - CORS_ORIGIN=*
+    depends_on:
+      ml-service:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+    networks:
+      - fradscr_internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  fradscr_internal:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local

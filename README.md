@@ -371,11 +371,42 @@ curl -X POST http://localhost:3000/api/predict \
 ### Automated Testing
 
 ```bash
-# Run complete Jest test suite (77 tests across unit, integration, and security)
+# Run complete Jest test suite (81 tests across unit, integration, and security)
 npm test
 
-# Run Python ML test suite (17 tests)
-./venv/bin/pytest tests/test_predict_service.py tests/test_holdout.py
+# Run Python ML test suite (151 tests)
+./venv/bin/pytest
+```
+
+---
+
+## Production Docker Deployment
+
+FRADSCR is fully containerized for high-availability production environments:
+
+### 1. Start Multi-Container Stack
+
+```bash
+# Build images and launch background services
+docker compose up -d --build
+```
+
+This starts:
+- **`fradscr-ml-service`**: Persistent in-memory FastAPI ML prediction service (port 8000, internal-only).
+- **`fradscr-mongodb`**: Audit & query logging store with healthcheck.
+- **`fradscr-web-app`**: Express 5 + Socket.io gateway serving low-bandwidth UI (port 3000).
+
+### 2. Verify Container Health
+
+```bash
+docker compose ps
+curl http://localhost:3000/health
+```
+
+### 3. Stop Stack
+
+```bash
+docker compose down
 ```
 
 

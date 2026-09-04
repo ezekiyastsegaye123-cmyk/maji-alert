@@ -1,0 +1,37 @@
+# ==============================================================================
+# FRADSCR — Node.js Express Gateway & Socket.io Web Application
+# ==============================================================================
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production \
+    PORT=3000
+
+# Install curl for container healthchecking
+RUN apk add --no-cache curl
+
+# Copy dependency manifests first for layer caching
+COPY package*.json ./
+
+# Install production dependencies only (omit devDependencies like jest/puppeteer)
+RUN npm ci --omit=dev
+
+# Copy application source code and static assets
+COPY src/ ./src/
+COPY public/ ./public/
+COPY server.js .
+
+# Create non-root system user for security hardening
+USER node
+
+# Health check using Express /health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+EXPOSE 3000
+
+# Start production server
+CMD ["node", "server.js"]
