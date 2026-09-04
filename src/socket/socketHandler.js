@@ -1,5 +1,5 @@
 /**
- * Socket.io Handler for FRDASCR
+ * Socket.io Handler for FRADSCR
  * =================================
  * Manages real-time WebSocket communication for drought predictions.
  * Enforces per-socket concurrency, cooldown throttling, and zero-broadcast privacy.
@@ -21,7 +21,7 @@ const EVENTS = {
 const MIN_COOLDOWN_MS = 2000;
 
 /**
- * Attaches FRDASCR event listeners to Socket.io instance.
+ * Attaches FRADSCR event listeners to Socket.io instance.
  *
  * @param {import('socket.io').Server} io
  */

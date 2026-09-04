@@ -278,9 +278,9 @@ tests/
 ├── test_rwi.py
 └── test_solar_lag.py
 
-## FRDASCR — Solar Groundwater Pump Drought Warning System
+## FRADSCR — Solar Groundwater Pump Drought Warning System
 
-**FRDASCR** is a production web interface and real-time backend API built for low-bandwidth cellular networks in the **Borana Zone, Oromia, Ethiopia**. It links regional tree-ring climate memory (*Juniperus procera*) and solar cycle teleconnections directly to community water point operators and solar-powered borehole pumps.
+**FRADSCR** is a production web interface and real-time backend API built for low-bandwidth cellular networks in the **Borana Zone, Oromia, Ethiopia**. It links regional tree-ring climate memory (*Juniperus procera*) and solar cycle teleconnections directly to community water point operators and solar-powered borehole pumps.
 
 ### Target Architecture
 
@@ -328,7 +328,7 @@ cp .env.example .env
 | Variable | Default | Description |
 | :--- | :--- | :--- |
 | `PORT` | `3000` | Port for Express & Socket.io server |
-| `MONGODB_URI` | `mongodb://127.0.0.1:27017/frdascr` | MongoDB connection string for QueryLog |
+| `MONGODB_URI` | `mongodb://127.0.0.1:27017/fradscr` | MongoDB connection string for QueryLog |
 | `PYTHON_EXECUTABLE` | `./venv/bin/python` | Path to Python 3.10+ venv binary |
 | `ML_SERVICE_PATH` | `./predict_service.py` | Path to prediction service script |
 | `ML_TIMEOUT_MS` | `45000` | Execution timeout for Python subprocess |

@@ -1,5 +1,5 @@
 """
-FRDASCR — Phase 1 Model Recalibration & Validation Pipeline
+FRADSCR — Phase 1 Model Recalibration & Validation Pipeline
 =============================================================
 
 Executes:
@@ -128,7 +128,7 @@ def run_threshold_edge_case_tests(classes: np.ndarray) -> None:
 
 
 def main():
-    logger.info("Starting FRDASCR Phase 1 Model Recalibration...")
+    logger.info("Starting FRADSCR Phase 1 Model Recalibration...")
 
     # Paths
     eth007_rwl = Path("africa/eth007.rwl")

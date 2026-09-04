@@ -14,7 +14,7 @@ describe('REST API & Server Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
-      expect(res.body.service).toBe('FRDASCR API');
+      expect(res.body.service).toBe('FRADSCR API');
       expect(res.body).toHaveProperty('uptime_seconds');
       expect(res.body).toHaveProperty('components');
 
@@ -31,7 +31,7 @@ describe('REST API & Server Endpoints', () => {
       const res = await request(app).get('/');
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('text/html');
-      expect(res.text).toContain('FRDASCR');
+      expect(res.text).toContain('FRADSCR');
       expect(res.text).toContain('Borana');
     });
 

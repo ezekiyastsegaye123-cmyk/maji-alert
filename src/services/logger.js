@@ -1,5 +1,5 @@
 /**
- * Structured Logger for FRDASCR
+ * Structured Logger for FRADSCR
  * =================================
  * Provides uniform log output with timestamp, log-level, and metadata.
  */
