@@ -46,6 +46,7 @@
       model_confidence: 'Model Confidence:',
       model_accuracy: 'Model Accuracy:',
       total_drought_risk: 'Total Drought Risk:',
+      risk_tier_label: 'Risk Tier:',
       class_normal: 'Normal / Wet',
       class_moderate: 'Moderate Drought',
       class_severe: 'Severe Drought',
@@ -96,6 +97,7 @@
       model_confidence: 'Amanamummaa Moodeelaa:',
       model_accuracy: 'Sirrummaa Moodeelaa:',
       total_drought_risk: 'Waliigala Risaa Hongee:',
+      risk_tier_label: 'Sadarkaa Sodaa:',
       class_normal: 'Nagaya / Rooba',
       class_moderate: 'Hongee Giddu-galeessa',
       class_severe: 'Hongee Hamaa',
@@ -146,6 +148,7 @@
       model_confidence: 'የሞዴል እርግጠኝነት:',
       model_accuracy: 'የሞዴል ትክክለኛነት:',
       total_drought_risk: 'አጠቃላይ የድርቅ ስጋት:',
+      risk_tier_label: 'የስጋት ደረጃ:',
       class_normal: 'መደበኛ / እርጥብ',
       class_moderate: 'መካከለኛ ድርቅ',
       class_severe: 'ከባድ ድርቅ',
@@ -199,6 +202,7 @@
     modelConfidenceText: document.getElementById('modelConfidenceText'),
     modelAccuracyText: document.getElementById('modelAccuracyText'),
     totalDroughtRiskText: document.getElementById('totalDroughtRiskText'),
+    riskTierText: document.getElementById('riskTierText'),
     pumpAdvisory: document.getElementById('pumpAdvisory'),
     probNormalText: document.getElementById('probNormalText'),
     probModerateText: document.getElementById('probModerateText'),
@@ -560,6 +564,18 @@
     }
     if (el.totalDroughtRiskText && typeof droughtRisk === 'number') {
       el.totalDroughtRiskText.textContent = `${Math.round(droughtRisk * 100)}%`;
+    }
+
+    // 2e. Display operational risk tier (e.g. Low, Guarded, Elevated, High Risk)
+    let riskTier = result.drought_risk_tier;
+    if (!riskTier && typeof droughtRisk === 'number') {
+      if (droughtRisk >= 0.50) riskTier = 'High Risk';
+      else if (droughtRisk >= 0.35) riskTier = 'Elevated Risk';
+      else if (droughtRisk >= 0.20) riskTier = 'Guarded Risk';
+      else riskTier = 'Low Risk';
+    }
+    if (el.riskTierText && riskTier) {
+      el.riskTierText.textContent = riskTier;
     }
 
     // 3. Confidence probabilities
