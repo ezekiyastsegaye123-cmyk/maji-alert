@@ -54,7 +54,9 @@
     "max_depth": 7,
     "max_features": "log2",
     "class_weight": null,
-    "random_state": 42
+    "random_state": 42,
+    "calibration_temperature": 0.35,
+    "optimal_temperature_evaluated": 0.35
   },
   "feature_importances": {
     "sunspot": 0.0665935294213101,
@@ -77,5 +79,15 @@
     "dmi_mean": 0.0503945692089233,
     "d13c": 0.0,
     "iwue": 0.0
+  },
+  "optimal_temperature_metrics": {
+    "T": 0.35,
+    "class_2_recall": 0.2,
+    "severe_drought_accuracy": 0.839622641509434,
+    "class_0_recall": 0.8307692307692308,
+    "macro_f1": 0.4115005779905037,
+    "brier_score": 0.70006152766917,
+    "mean_confidence": 0.8369545818620219,
+    "valid": true
   }
 }

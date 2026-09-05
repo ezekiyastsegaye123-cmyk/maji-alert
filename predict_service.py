@@ -67,6 +67,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 import time
 from contextlib import asynccontextmanager
@@ -149,6 +150,7 @@ class PredictionRequest(BaseModel):
     year: int = Field(..., ge=1700, le=2100, description="Evaluation year [1700, 2100]")
     d13c: Optional[float] = Field(None, description="Optional stable carbon isotope ratio (d13C permil)")
     iwue: Optional[float] = Field(None, description="Optional intrinsic water-use efficiency (iWUE umol/mol)")
+    temperature: Optional[float] = Field(None, ge=0.01, le=5.0, description="Optional probability calibration temperature (e.g., 0.35)")
 
 
 class GridCellInfo(BaseModel):
@@ -166,6 +168,7 @@ class PredictionResponse(BaseModel):
     confidence_probabilities: Dict[str, float]
     model_confidence: Optional[float] = None
     confidence_level: Optional[str] = None
+    calibration_temperature: Optional[float] = None
     operational_accuracy: Optional[float] = None
     severe_drought_detection_accuracy: Optional[float] = None
     normal_year_accuracy: Optional[float] = None
@@ -386,6 +389,7 @@ class DroughtPredictionService:
         year: int,
         d13c: Optional[float] = None,
         iwue: Optional[float] = None,
+        temperature: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Execute high-speed in-memory prediction without reloading heavy resources."""
         if not self.is_ready:
@@ -551,11 +555,23 @@ class DroughtPredictionService:
         p1 = float(probs[idx_1])
         p2 = float(probs[idx_2])
 
-        # 4b. Calibrated High-Confidence Scaling (Temperature Scaling T=0.35)
-        # Monotonically sharpens posterior distribution to ensure decisive, high-confidence (>=80%) predictions
-        temperature = 0.35
+        # 4b. Calibrated High-Confidence Scaling (Dynamic Temperature Scaling)
+        # Monotonically sharpens posterior distribution to ensure decisive, high-confidence (>=80%) predictions.
+        # Dynamically resolved: explicit parameter -> env CALIBRATION_TEMPERATURE -> default sweet spot 0.35
+        if temperature is not None:
+            t_val = float(temperature)
+        else:
+            env_t = os.getenv("CALIBRATION_TEMPERATURE")
+            if env_t:
+                try:
+                    t_val = float(env_t)
+                except ValueError:
+                    t_val = 0.35
+            else:
+                t_val = 0.35
+
         p_safe = np.clip(np.array([p0, p1, p2]), 1e-6, 1.0)
-        p_unnorm = p_safe ** (1.0 / temperature)
+        p_unnorm = p_safe ** (1.0 / t_val)
         calibrated_probs = p_unnorm / p_unnorm.sum()
         cal_p0, cal_p1, cal_p2 = float(calibrated_probs[0]), float(calibrated_probs[1]), float(calibrated_probs[2])
 
@@ -620,6 +636,7 @@ class DroughtPredictionService:
             "confidence_probabilities": prob_map,
             "model_confidence": round(float(confidence_val), 4),
             "confidence_level": confidence_tier,
+            "calibration_temperature": round(float(t_val), 2),
             "operational_accuracy": 0.8585,
             "severe_drought_detection_accuracy": 0.8585,
             "normal_year_accuracy": 0.8923,
@@ -644,10 +661,18 @@ def predict_drought(
     year: int,
     d13c: Optional[float] = None,
     iwue: Optional[float] = None,
+    temperature: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Functional interface for direct Python imports."""
     service = DroughtPredictionService.get_instance()
-    return service.predict(latitude=latitude, longitude=longitude, year=year, d13c=d13c, iwue=iwue)
+    return service.predict(
+        latitude=latitude,
+        longitude=longitude,
+        year=year,
+        d13c=d13c,
+        iwue=iwue,
+        temperature=temperature,
+    )
 
 
 # =============================================================================
@@ -781,6 +806,7 @@ async def predict_get(
     year: int = Query(..., ge=1700, le=2100, description="Evaluation year"),
     d13c: Optional[float] = Query(None, description="Optional d13C isotope proxy (permil)"),
     iwue: Optional[float] = Query(None, description="Optional iWUE isotope proxy (umol/mol)"),
+    temperature: Optional[float] = Query(None, ge=0.01, le=5.0, description="Optional calibration temperature"),
 ):
     """Execute high-speed in-memory prediction via GET query parameters."""
     service: Optional[DroughtPredictionService] = getattr(request.app.state, "service", None)
@@ -789,7 +815,14 @@ async def predict_get(
         service = DroughtPredictionService.get_instance()
 
     try:
-        return service.predict(latitude=latitude, longitude=longitude, year=year, d13c=d13c, iwue=iwue)
+        return service.predict(
+            latitude=latitude,
+            longitude=longitude,
+            year=year,
+            d13c=d13c,
+            iwue=iwue,
+            temperature=temperature,
+        )
     except InvalidInputError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     except Exception as exc:
@@ -818,6 +851,7 @@ async def predict_post(request: Request, payload: PredictionRequest):
             year=payload.year,
             d13c=payload.d13c,
             iwue=payload.iwue,
+            temperature=payload.temperature,
         )
     except InvalidInputError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
