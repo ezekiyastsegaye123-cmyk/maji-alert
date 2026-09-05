@@ -6,6 +6,9 @@ services:
     dockerfilePath: ./Dockerfile
     plan: starter
     region: frankfurt # Low latency to East Africa
+    domains:
+      - fradscr.pro.et
+      - www.fradscr.pro.et
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,7 +21,7 @@ services:
       - key: CALIBRATION_TEMPERATURE
         value: "0.35"
       - key: CORS_ORIGIN
-        value: "*"
+        value: "https://fradscr.pro.et,https://www.fradscr.pro.et,*"
       - key: RATE_LIMIT_WINDOW_MS
         value: "60000"
       - key: RATE_LIMIT_MAX_REQUESTS
