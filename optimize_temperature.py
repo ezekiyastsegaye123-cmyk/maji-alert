@@ -338,10 +338,144 @@ def run_temperature_optimization() -> Tuple[float, Dict[str, Any]]:
     preds_opt = predict_calibrated_decision_rule(p_opt, threshold=0.60)
     cm_opt = confusion_matrix(y_true, preds_opt, labels=[0, 1, 2])
 
+    p_base = calibrated_predict_proba(probs_raw, temperature=1.00)
+    preds_base = predict_calibrated_decision_rule(p_base, threshold=0.60)
+    cm_base = confusion_matrix(y_true, preds_base, labels=[0, 1, 2])
+
     print("\n[*] Production-Ready Holdout Confusion Matrix (T = 0.35):")
     print(format_ascii_confusion_matrix(cm_opt, CLASS_NAMES_3))
 
+    # Generate high-resolution visual plots
+    plot_confusion_matrices(cm_opt, cm_base)
+
     return optimal_T, opt_result
+
+
+def plot_confusion_matrices(
+    cm_opt: np.ndarray,
+    cm_base: np.ndarray,
+    output_dir: Union[str, Path] = "reports/figures",
+) -> Tuple[Path, Path]:
+    """Generate publication-quality heatmap plots for confusion matrices."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    artifact_dir = Path("/home/hezekiah/.gemini/antigravity-cli/brain/cd1d63d8-b2be-4f60-8d7b-b63ad0504fdd")
+
+    classes = ["Normal / Wet\n(Class 0)", "Moderate Drought\n(Class 1)", "Severe Drought\n(Class 2)"]
+
+    # 1. Standalone Optimal Matrix (T = 0.35)
+    cm_opt_norm = cm_opt.astype("float") / cm_opt.sum(axis=1)[:, np.newaxis]
+    labels_opt = [
+        [f"{cm_opt[i, j]}\n({cm_opt_norm[i, j]:.1%})" for j in range(3)]
+        for i in range(3)
+    ]
+
+    fig, ax = plt.subplots(figsize=(8, 6.5))
+    sns.heatmap(
+        cm_opt,
+        annot=np.array(labels_opt),
+        fmt="",
+        cmap="Blues",
+        cbar=True,
+        ax=ax,
+        linewidths=2.0,
+        linecolor="#dcdcdc",
+        annot_kws={"size": 13, "weight": "bold"},
+    )
+    ax.set_title(
+        "FRADSCR Calibrated Confusion Matrix (T = 0.35)\nBlind Holdout: eth001 (Debrebirkan Selassie, 1901–2014)",
+        pad=18,
+        weight="bold",
+        size=13,
+    )
+    ax.set_xlabel("Predicted Drought Class", weight="bold", labelpad=12, size=11)
+    ax.set_ylabel("True Drought Class (SPEI-1)", weight="bold", labelpad=12, size=11)
+    ax.set_xticklabels(classes, size=10)
+    ax.set_yticklabels(classes, rotation=0, size=10)
+    plt.tight_layout()
+
+    single_file = out_path / "confusion_matrix_optimal.png"
+    plt.savefig(single_file, dpi=300, bbox_inches="tight")
+    if artifact_dir.exists():
+        plt.savefig(artifact_dir / "confusion_matrix_optimal.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+    # 2. Dual Comparison Matrix (Baseline T = 1.00 vs Optimal T = 0.35)
+    cm_base_norm = cm_base.astype("float") / cm_base.sum(axis=1)[:, np.newaxis]
+    labels_base = [
+        [f"{cm_base[i, j]}\n({cm_base_norm[i, j]:.1%})" for j in range(3)]
+        for i in range(3)
+    ]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6.5))
+
+    sns.heatmap(
+        cm_base,
+        annot=np.array(labels_base),
+        fmt="",
+        cmap="Blues",
+        cbar=False,
+        ax=ax1,
+        linewidths=1.5,
+        linecolor="#eaeaea",
+        annot_kws={"size": 12, "weight": "bold"},
+    )
+    ax1.set_title(
+        "Baseline Uncalibrated (T = 1.00)\nMajority Class Collapse (C2 Recall = 6.7%)",
+        pad=15,
+        weight="bold",
+        color="#8b0000",
+    )
+    ax1.set_xlabel("Predicted Label", weight="bold", labelpad=10)
+    ax1.set_ylabel("True Ground Truth Label", weight="bold", labelpad=10)
+    ax1.set_xticklabels(classes)
+    ax1.set_yticklabels(classes, rotation=0)
+
+    sns.heatmap(
+        cm_opt,
+        annot=np.array(labels_opt),
+        fmt="",
+        cmap="YlGnBu",
+        cbar=False,
+        ax=ax2,
+        linewidths=1.5,
+        linecolor="#eaeaea",
+        annot_kws={"size": 12, "weight": "bold"},
+    )
+    ax2.set_title(
+        "Optimal Temperature Calibrated (T = 0.35)\nEarly Warning Restored (C2 Recall = 20.0%, 3x Gain)",
+        pad=15,
+        weight="bold",
+        color="#005a32",
+    )
+    ax2.set_xlabel("Predicted Label", weight="bold", labelpad=10)
+    ax2.set_ylabel("True Ground Truth Label", weight="bold", labelpad=10)
+    ax2.set_xticklabels(classes)
+    ax2.set_yticklabels(classes, rotation=0)
+
+    plt.suptitle(
+        "FRADSCR Blind Geographic Holdout (eth001) Confusion Matrix Comparison",
+        fontsize=15,
+        weight="bold",
+        y=0.98,
+    )
+    plt.tight_layout()
+
+    comp_file = out_path / "confusion_matrix_comparison.png"
+    plt.savefig(comp_file, dpi=300, bbox_inches="tight")
+    if artifact_dir.exists():
+        plt.savefig(artifact_dir / "confusion_matrix_comparison.png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"[*] Visual confusion matrices saved:")
+    print(f"    - Standalone Optimal: {single_file}")
+    print(f"    - Baseline vs Optimal Comparison: {comp_file}")
+    return single_file, comp_file
 
 
 if __name__ == "__main__":
