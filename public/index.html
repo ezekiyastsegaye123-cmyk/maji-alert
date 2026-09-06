@@ -14,8 +14,10 @@
     <header class="app-header" role="banner">
       <div class="header-content">
         <div class="brand">
-          <span class="brand-icon" aria-hidden="true">💧☀️</span>
-          <div>
+          <div class="brand-icon-wrapper">
+            <span class="brand-icon" aria-hidden="true">💧☀️</span>
+          </div>
+          <div class="brand-title-wrap">
             <h1 class="brand-title" data-i18n="app_title">FRADSCR</h1>
             <p class="brand-subtitle" data-i18n="app_subtitle">Borana Zone Solar Pump Drought Warning</p>
           </div>
@@ -146,7 +148,9 @@
         <!-- Alert Gauge / Severity Card -->
         <div id="gaugeContainer" class="gauge-container gauge-normal">
           <div class="gauge-badge">
-            <span id="gaugeIcon" class="gauge-icon" aria-hidden="true">🟢</span>
+            <div class="gauge-icon-frame">
+              <span id="gaugeIcon" class="gauge-icon" aria-hidden="true">🟢</span>
+            </div>
             <div>
               <div class="gauge-subtitle" data-i18n="risk_level">Risk Level</div>
               <div id="severityLabel" class="gauge-title">NORMAL / WET</div>

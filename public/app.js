@@ -387,6 +387,9 @@
   el.presetButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       clearErrors();
+      el.presetButtons.forEach((b) => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
       const lat = btn.getAttribute('data-lat');
       const lon = btn.getAttribute('data-lon');
       const name = btn.getAttribute('data-name');
